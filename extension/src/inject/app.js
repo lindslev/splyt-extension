@@ -1,3 +1,4 @@
+var ytAPI = "AIzaSyC_eZm_iimb5fx5So3Bt4h96ZuKQqd7ARU";
 //modules.on('Endpoint',function(response){
 //response.err and response.data
 //})
@@ -38,18 +39,19 @@ function init() {
 modules.on('checkForEmbed', scrapeEmbed)
 
 function scrapeEmbed() {
-  console.log('scrape embed called?')
   var playlistButton = "<button class='playlistButton'>Add to Splyt</button>";
   var tempDiv = document.createElement('div');
   tempDiv.innerHTML = playlistButton;
 
   var iframes = document.getElementsByTagName('iframe');
+  console.log('iframes arr', iframes)
+  var youtubeIDs = "";
+
   for(var key in iframes) {
     var iframe = iframes[key];
     if(iframe.outerHTML) {
         /** soundcloud embeds **/
         if(iframe.outerHTML.match(/soundcloud/g)) {
-        console.log('iframe.outerHTML', iframe.outerHTML, typeof iframe.outerHTML)
           var src = decodeURIComponent(iframe.src)
           /** soundcloud track embeds **/
           if(src.split('tracks/').length == 2) {
@@ -58,7 +60,7 @@ function scrapeEmbed() {
             $.ajax({url: url})
               .done(function(song){
                   chrome.runtime.sendMessage({
-                    action: 'newSong',
+                    action: 'newSCSong',
                     method: '',
                     args: { song : song, iframeSrc: src }
                   })
@@ -71,14 +73,40 @@ function scrapeEmbed() {
             $.ajax({url: url})
               .done(function(playlist){
                   chrome.runtime.sendMessage({
-                    action: 'newPlaylist',
+                    action: 'newSCPlaylist',
                     method: '',
                     args: { playlist: playlist, iframeSrc: src }
                   })
               });
           }
-
         } /** end soundcloud embeds **/
+        if(iframe.outerHTML.match(/youtube/g)) {
+          var src = decodeURIComponent(iframe.src)
+          var videoID = src.split('/embed/')[1].split('?')[0];
+          if(youtubeIDs.indexOf(videoID) < 0) { //tests to see if we've checked this iframe yet
+            youtubeIDs += videoID;
+            console.log('inside youtube embed check', iframe);
+            $.ajax({
+                      url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
+                      type: 'GET'
+                  })
+                  .done(function(result){
+                    console.log('how many times is this run???')
+                    result = JSON.parse(result);
+                    if(result.items[0].snippet.categoryId == '10') { //if music category
+                      chrome.runtime.sendMessage({
+                        action: 'newYoutubeSong',
+                        method: '',
+                        args: { info : result, iframeSrc: src }
+                      })
+                    }
+                  })
+          }
+        } /** end youtube embeds **/
+        if(iframe.outerHTML.match(/spotify/g)) {
+
+        } /**end spotify embeds **/
+
     } /** end if(iframe.outerHTML)**/
   } /** end key in iframes **/
 } /** end scrapeEmbed() **/

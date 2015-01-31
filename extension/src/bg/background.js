@@ -13,9 +13,15 @@ var Splyt = new Splyt('http://192.168.1.121:9000');
 var currentSongsOnPage = [], currentPlaylistsOnPage = [];
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     console.log('did we receive a msg from the content?', message)
-    if(message.action == 'newSong') currentSongsOnPage.push(message.args);
-    if(message.action == 'newPlaylist') currentPlaylistsOnPage.push(message.args);
-
+    if(message.action == 'newSCSong') currentSongsOnPage.push(message.args);
+    if(message.action == 'newSCPlaylist') currentPlaylistsOnPage.push(message.args);
+    if(message.action == 'newYoutubeSong') {
+      message.args.song = {
+          permalink_url: "https://www.youtube.com/watch?v=" + message.args.info.items[0].id,
+          title: message.args.info.items[0].snippet.title
+      }
+      currentSongsOnPage.push(message.args)
+    }
 
 
 
@@ -40,31 +46,15 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 ////////////////////////////////////////////////////////////////////////
 // Whenever you open a new tab or go to a new page from an existing tab, and it finishes loading, send a message to that tab telling the app to initialize.
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-      if (changeInfo.status && changeInfo.status == 'complete') {
-        runChecks(tabId)
-      //   chrome.tabs.sendMessage(tabId, {
-      //       action: 'checkForEmbed',
-      //       err: null,
-      //       data: null
-      //   }, function(response) {
-      //       if (response) console.log(response);
-      //   });
-      }
-  })
+  if (changeInfo.status && changeInfo.status == 'complete') {
+    runChecks(tabId)
+  }
+})
 
 /////////////////////////////////////////////
 // Fires when the active tab in a window changes
 chrome.tabs.onActivated.addListener(function(changeInfo){
-  console.log('inside onActivated', changeInfo.tabId)
   runChecks(changeInfo.tabId)
-  // chrome.tabs.sendMessage(changeInfo.tabId, {
-  //           action: 'checkForEmbed',
-  //           err: null,
-  //           data: null
-  //       }, function(response) {
-  //           console.log('inside response')
-  //           if (response) console.log(response);
-  //       });
 })
 
 ///////////////////////////////////////////
