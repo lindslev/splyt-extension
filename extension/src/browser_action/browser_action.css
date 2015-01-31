@@ -1,0 +1,32 @@
+/*browser-action css*/
+body {
+  background: #009688;
+  text-align: center;
+}
+#mainPopup {
+  width: 300px;
+  font-family: Lato;
+  font-weight: Thin 100;
+  color: white;
+}
+h1 {
+  background: white;
+  color: #009688;
+  font-size: 2em;
+}
+ul {
+  list-style-type: none;
+}
+
+a, a:hover {
+  text-decoration: none;
+  color: white;
+}
+
+a:hover {
+  color: black;
+}
+
+button {
+  font-size: 10px;
+}

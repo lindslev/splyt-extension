@@ -2,6 +2,7 @@
   "name": "Splyt",
   "version": "0.0.1",
   "manifest_version": 2,
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "description": "This extension was created with the awesome extensionizr.com",
   "homepage_url": "http://extensionizr.com",
   "icons": {
@@ -17,8 +18,11 @@
   "options_page": "src/options_custom/index.html",
   "browser_action": {
     "default_icon": "icons/icon19.png",
-    "default_title": "browser action demo",
+    "default_title": "Splyt",
     "default_popup": "src/browser_action/browser_action.html"
+  },
+  "externally_connectable": {
+    "matches": ["http://localhost:9000/"]
   },
   "permissions": [
     "clipboardRead",
@@ -31,23 +35,29 @@
     "notifications",
     "tabs",
     "geolocation",
-    "https://*/*, http://*/*"
+    "tabCapture",
+    "declarativeContent",
+    "https://*/*",
+    "http://*/*"
   ],
   "content_scripts": [
     {
       "matches": [
-        "https://www.google.com/*"
+        "*://*/*"
       ],
       "css": [
+        "src/inject/reset.css",
         "src/inject/inject.css"
       ]
     },
     {
       "matches": [
-        "https://www.google.com/*"
+        "*://*/*"
       ],
       "js": [
-        "src/inject/inject.js"
+        "js/jquery/jquery.js",
+        "src/inject/hooks.js",
+        "src/inject/app.js"
       ]
     }
   ]
