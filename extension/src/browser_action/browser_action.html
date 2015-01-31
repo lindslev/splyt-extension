@@ -1,17 +1,17 @@
 <!doctype html>
-<style type="text/css">
-	#mainPopup {
-		padding: 10px;
-		height: 200px;
-		width: 400px;
-		font-family: Helvetica, Ubuntu, Arial, sans-serif;
-	}
-	h1 {
-		font-size: 2em;
-	}
-</style>
-
-<div id="mainPopup">
-<h1>Splyt</h1>
-<p>Wow. Much extension.</p>
-</div>
+<head>
+  <link href='http://fonts.googleapis.com/css?family=Lato:100,300,400,700,900,100italic,300italic,400italic,700italic,900italic' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="browser_action.css">
+</head>
+<script src="/js/angular/angular.js"></script>
+<script src="browser_action.js"></script>
+<body ng-app="splytApp">
+  <div ng-controller="HomeCtrl" id="mainPopup">
+  <h1>Splyt</h1>
+  <ul>
+    <li ng-repeat="song in songs">
+      <a href="{{song.permalink_url}}">{{song.title}}</a><button ng-click="addSong(song)">Add</button>
+    </li>
+  </ul>
+  </div>
+</body>

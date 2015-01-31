@@ -3,52 +3,56 @@ var Splyt = function(api) {
     this.api = api;
 }
 
-Splyt.prototype.Friend = function() {
+//Good to think of the 'args' argument as being sent straight from the client. Background is only a buffer.
+Splyt.prototype.Endpoint = function() {
     var self = this;
-    // return {
-    //     GET: function(args, callback) {
-    //         console.log(self);
-    //         //args.domain
-    //         console.log(args.page);
-    //         var params = ''
-    //         if (args.id) {
-    //             params = '?id=' + args.id
-    //         }
-    //         $.ajax({
-    //             url: self.api + '/api/pages/' + args.page + params,
-    //             dataType: 'json',
-    //             success: function(data) {
-    //                 console.log(data);
-    //                 callback(null, data)
-    //             },
-    //             error: function(xhr, status, err) {
-    //                 console.error(status, err.toString());
-    //                 callback(err.toString())
-    //             }
-    //         });
+    return {
+        GET: function(args, callback) {
+            console.log(args);
+            $.ajax({
+                url: self.api + '/api/endpoint/',
+                dataType: 'json',
+                success: function(data) {
+                    console.log(data);
+                    callback(null, data)
+                },
+                error: function(xhr, status, err) {
+                    console.error(status, err.toString());
+                    callback(err.toString())
+                }
+            });
 
-    //     },
-    //     POST: function POST(args,callback) {
-    //         $.ajax({
-    //             type: "POST",
-    //             url: self.api + '/api/pages/',
-    //             data: args,
-    //             success: function(data) {
-    //                 console.log(data);
-    //                 callback(null, data)
-    //             },
-    //             error: function(xhr, status, err) {
-    //                 console.error(status, err.toString());
-    //                 callback(err.toString())
-    //             },
-    //             dataType: 'json'
-    //         });
-    //     },
-    //     UPDATE: function UPDATE() {
+        },
+        POST: function POST(args,callback) {
+            $.ajax({
+                type: "POST",
+                url: self.api + '/api/endpoint/',
+                data: args,
+                success: function(data) {
+                    console.log(data);
+                    callback(null, data)
+                },
+                error: function(xhr, status, err) {
+                    console.error(status, err.toString());
+                    callback(err.toString())
+                },
+                dataType: 'json'
+            });
+        },
+        UPDATE: function UPDATE() {
 
-    //     },
-    //     DELETE: function DELETE() {
+        },
+        DELETE: function DELETE() {
 
-    //     }
-    // }
+        }
+    }
+}
+
+Splyt.prototype.soundcloud_get = function() {
+  var self = this;
+  return {
+    GET: function(args, callback) {
+
+    }
+  }
 }

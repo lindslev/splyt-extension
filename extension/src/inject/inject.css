@@ -1,3 +1,9 @@
 /**
  * Place your custom CSS styles here.
  **/
+.playlistButton {
+  width: 100px;
+  font-size: 20px;
+  color: red;
+  background: black;
+}
