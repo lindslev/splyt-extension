@@ -48,11 +48,11 @@ Splyt.prototype.Endpoint = function() {
     }
 }
 
-Splyt.prototype.soundcloud_get = function() {
-  var self = this;
-  return {
-    GET: function(args, callback) {
+// Splyt.prototype.soundcloud_get = function() {
+//   var self = this;
+//   return {
+//     GET: function(args, callback) {
 
-    }
-  }
-}
+//     }
+//   }
+// }

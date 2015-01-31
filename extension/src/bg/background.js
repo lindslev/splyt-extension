@@ -2,25 +2,24 @@
 //When you're in production, make sure that your production url's reflected here.
 var Splyt = new Splyt('http://192.168.1.121:9000');
 
-// This is important. Splyt is essentially a resource at this point and you can run methods on it like:
+// Splyt is essentially a resource at this point and you can run methods on it like:
 // Splyt.Endpoint().GET(arguments,callback);
-
-// To expose the resource to any content scripts and make interactions more uniform, I've implemented this html form-like convention:
 
 // Chrome runtime expects to be sent an object ('message' in the example below) with keys:
 // action - the endpoint you want to target, like comment, item, user, etc
 // method - get,post,update, or delete.
 // args - an object containing the data you need to send in request body or params.
 
-// Chrome content scripts / popup will always be sent an object
-
-
-//THIS IS THE IMPORTANT BIT
 var currentSongsOnPage = [];
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-    // Splitting by : allows you to send more targeted messages back to the client, but isnt entirely necessary.
     console.log('did we receive a msg from the content?', message)
-    if(message.action == 'newSong') currentSongsOnPage.push(message.args.song);
+    if(message.action == 'newSong') currentSongsOnPage.push(message.args);
+
+
+
+
+
+    /*** for talking to splytAPI & server ***/
     //Given the message = {
     //  action: 'Endpoint',
     //  method: 'GET',
@@ -29,36 +28,57 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     //  }
     // }
 
-    // Will run the Splyt method at the 'Endpoint' key, which returns an object with GET,POST,UPDATE,DELETE functions.
-    //Which you can then run through bracket notation, like 'GET', then pass it the args object.
-
-    // Splyt[message.action.split(':')[0]]()[message.method](message.args, function(err, data) {
-    //     //close over the sender.tab.id so that specific content script instance can respond to it.
-
-    //     //Background.js will always send back an object with the action of the ORIGINAL message it was sent ('Endpoint' in this case), the data of the server response, and an err if any.
-    //     chrome.tabs.sendMessage(sender.tab.id, {
-    //         action: message.action,
-    //         data: data,
-    //         err: err
-    //     });
-    // })
+    // Background.js will always send back an object with the action of the ORIGINAL message it was sent ('Endpoint' in this case), the data of the server response, and an err if any.
+    // chrome.tabs.sendMessage(sender.tab.id, {
+    //  action: message.action,
+    //  data: data,
+    //  err: err
+    // });
 })
 
 ////////////////////////////////////////////////////////////////////////
 // Whenever you open a new tab or go to a new page from an existing tab, and it finishes loading, send a message to that tab telling the app to initialize.
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-    console.log(arguments);
-    // if(tab.url.match(/soundcloud/g) || tab.url.match(/tumblr/g))
       if (changeInfo.status && changeInfo.status == 'complete') {
-        chrome.tabs.sendMessage(tabId, {
-            action: 'checkForEmbed',
-            err: null,
-            data: { thissongissick:true }
-        }, function(response) {
-            if (response) console.log(response);
-        });
+        runChecks(tabId)
+      //   chrome.tabs.sendMessage(tabId, {
+      //       action: 'checkForEmbed',
+      //       err: null,
+      //       data: null
+      //   }, function(response) {
+      //       if (response) console.log(response);
+      //   });
       }
   })
+
+/////////////////////////////////////////////
+// Fires when the active tab in a window changes
+chrome.tabs.onActivated.addListener(function(changeInfo){
+  console.log('inside onActivated', changeInfo.tabId)
+  runChecks(changeInfo.tabId)
+  // chrome.tabs.sendMessage(changeInfo.tabId, {
+  //           action: 'checkForEmbed',
+  //           err: null,
+  //           data: null
+  //       }, function(response) {
+  //           console.log('inside response')
+  //           if (response) console.log(response);
+  //       });
+})
+
+///////////////////////////////////////////
+// Run checks on tab change && page load
+function runChecks(tabId) {
+  currentSongsOnPage = [];
+  chrome.tabs.sendMessage(tabId, {
+            action: 'checkForEmbed',
+            err: null,
+            data: null
+        }, function(response) {
+            console.log('inside response')
+            if (response) console.log(response);
+        });
+}
 
 ///////////////////////////////////////////////
 //Sockets
