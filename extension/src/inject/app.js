@@ -69,11 +69,11 @@ function scrapeEmbed() {
             var scPlaylistId = src.split('playlists/')[1].split(/[\?\&]/)[0];
             var url = "https://api.soundcloud.com/playlists/" + scPlaylistId + "?client_id=7af759eb774be5664395ed9afbd09c46&format=json";
             $.ajax({url: url})
-              .done(function(song){
+              .done(function(playlist){
                   chrome.runtime.sendMessage({
                     action: 'newPlaylist',
                     method: '',
-                    args: { song: song, iframeSrc: src }
+                    args: { playlist: playlist, iframeSrc: src }
                   })
               });
           }

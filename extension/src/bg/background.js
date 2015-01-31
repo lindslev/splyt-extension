@@ -10,10 +10,11 @@ var Splyt = new Splyt('http://192.168.1.121:9000');
 // method - get,post,update, or delete.
 // args - an object containing the data you need to send in request body or params.
 
-var currentSongsOnPage = [];
+var currentSongsOnPage = [], currentPlaylistsOnPage = [];
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     console.log('did we receive a msg from the content?', message)
     if(message.action == 'newSong') currentSongsOnPage.push(message.args);
+    if(message.action == 'newPlaylist') currentPlaylistsOnPage.push(message.args);
 
 
 
@@ -70,6 +71,7 @@ chrome.tabs.onActivated.addListener(function(changeInfo){
 // Run checks on tab change && page load
 function runChecks(tabId) {
   currentSongsOnPage = [];
+  currentPlaylistsOnPage = [];
   chrome.tabs.sendMessage(tabId, {
             action: 'checkForEmbed',
             err: null,
@@ -114,4 +116,8 @@ chrome.runtime.onMessageExternal.addListener(
 
 function currentSongs() {
   return currentSongsOnPage;
+}
+
+function currentPlaylists() {
+  return currentPlaylistsOnPage;
 }
