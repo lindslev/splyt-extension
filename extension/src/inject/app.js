@@ -13,39 +13,13 @@ modules.on('init', init)
 
 function init() {
   console.log('app initialized')
-  //PUT YOUR APP LOGIC HERE, be it injecting an mvc framework, jquery logic, whatever.
-
-  // For example:
-
-  //var playlist = [];
-
-  // modules.on('Playlist:ADD',function(response){
-  //    playlist.push(response.data)
-  //    update app state.......
-  // })
-
-  // $('.soundcloud_embed').on('click',function(){
-  //    var trackId = $(this).attr('track-id');
-  //    modules.send({
-  //      action: 'Playlist:ADD',
-  //      method:,'POST'
-  //      args: {
-  //        item_id : trackId
-  //      }
-  //    })
-  //})
 }
 
 modules.on('checkForEmbed', scrapeEmbed)
 
 function scrapeEmbed() {
-  var playlistButton = "<button class='playlistButton'>Add to Splyt</button>";
-  var tempDiv = document.createElement('div');
-  tempDiv.innerHTML = playlistButton;
-
   var iframes = document.getElementsByTagName('iframe');
-  console.log('iframes arr', iframes)
-  var youtubeIDs = "";
+  var youtubeIDs = ""; //tracks which ids we've sent to the background script already
 
   for(var key in iframes) {
     var iframe = iframes[key];
@@ -85,13 +59,11 @@ function scrapeEmbed() {
           var videoID = src.split('/embed/')[1].split('?')[0];
           if(youtubeIDs.indexOf(videoID) < 0) { //tests to see if we've checked this iframe yet
             youtubeIDs += videoID;
-            console.log('inside youtube embed check', iframe);
             $.ajax({
                       url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
                       type: 'GET'
                   })
                   .done(function(result){
-                    console.log('how many times is this run???')
                     result = JSON.parse(result);
                     if(result.items[0].snippet.categoryId == '10') { //if music category
                       chrome.runtime.sendMessage({
@@ -102,9 +74,52 @@ function scrapeEmbed() {
                     }
                   })
           }
-        } /** end youtube embeds **/
+        }
+        /** for tumblr dashboard embedded youtubes**/
+        if(iframe.outerHTML.match(/safe.txmblr/g) && iframe.outerHTML.match(/style="width/g)) {
+          $.ajax({ url: iframe.src })
+            .done(function(result){
+              var iframe = result.substring(result.indexOf('<iframe'), (result.indexOf('</iframe>') + 9));
+              if(iframe.match(/youtube/g)) {
+                console.log('iframes matching safetxmblr', iframe)
+                var src = iframe.substring(iframe.indexOf('src="'), iframe.indexOf('" frameborder'));
+                src = decodeURIComponent(src);
+                var videoID = src.split('/embed/')[1].split('?')[0];
+                if(youtubeIDs.indexOf(videoID) < 0) { //tests to see if we've checked this iframe yet
+                  youtubeIDs += videoID;
+                  $.ajax({
+                            url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
+                            type: 'GET'
+                        })
+                        .done(function(result){
+                          result = JSON.parse(result);
+                          if(result.items[0].snippet.categoryId == '10') { //if music category
+                            chrome.runtime.sendMessage({
+                              action: 'newYoutubeSong',
+                              method: '',
+                              args: { info : result, iframeSrc: src }
+                            })
+                          }
+                        })
+                }
+              }
+            })
+        }
+        /** end youtube embeds **/
         if(iframe.outerHTML.match(/spotify/g)) {
-
+          var src2 = decodeURIComponent(iframe.src);
+          var spotTrackId = src2.split(':track:')[1].split('&')[0];
+          $.ajax({
+              url: 'https://api.spotify.com/v1/tracks/' + spotTrackId,
+              type: 'GET'
+            })
+            .done(function(track){
+              chrome.runtime.sendMessage({
+                action: 'newSpotifySong',
+                method: '',
+                args: { info: track, iframeSrc: src2 }
+              })
+            })
         } /**end spotify embeds **/
 
     } /** end if(iframe.outerHTML)**/
