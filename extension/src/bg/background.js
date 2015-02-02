@@ -23,14 +23,21 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
       currentSongsOnPage.push(message.args)
     }
     if(message.action == 'newSpotifySong') {
-      console.log('spotify...', message.args)
       message.args.song = {
         permalink_url: message.args.info.external_urls.spotify,
         title: message.args.info.name
       }
       currentSongsOnPage.push(message.args);
     }
-
+    if(message.action == 'newTumblrSong') {
+      if(message.method == 'tumblog') {
+        message.args.song['permalink_url'] = message.args.iframeSrc.substring(
+                                                message.args.iframeSrc.indexOf('/post/' + 6),
+                                                message.args.iframeSrc.indexOf('/audio_player_iframe/')
+                                            );
+      }
+      currentSongsOnPage.push(message.args);
+    }
 
 
 
@@ -56,6 +63,15 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
   if (changeInfo.status && changeInfo.status == 'complete') {
     runChecks(tabId)
+  }
+  if(tab.url.match(/tumblr/g)) {
+    chrome.tabs.sendMessage(tabId, {
+      action: 'tumblrAudio',
+      err: null,
+      data: null
+    }, function(response){
+      console.log('inside response', response)
+    })
   }
 })
 
