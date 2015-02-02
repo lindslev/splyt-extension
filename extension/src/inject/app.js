@@ -144,7 +144,8 @@ function scrapeTumblr() {
   var songs = document.getElementsByClassName('tumblr_audio_player'); //diff format depending on whether youre looking at someone's blog
   var dashSongs = document.getElementsByClassName('audio_player_container'); //or actually in the tumblr dash
   if(songs.length !== 0) {
-    for(var key in songs){
+    Object.keys(songs).forEach(function(key){
+    // for(var key in songs){
       if(typeof songs[key] == 'object') {
         var song = songs[key];
         var src = decodeURIComponent(song.src);
@@ -160,12 +161,14 @@ function scrapeTumblr() {
           })
         })
       }
-    }
+    })
   }
   if(dashSongs.length !== 0) {
-    for(var key in dashSongs){
+    Object.keys(dashSongs).forEach(function(key){
+    // for(var key in dashSongs){
       if(typeof dashSongs[key] == 'object') {
         var song = dashSongs[key];
+        console.log('song...', song)
         var songTitle = song.attributes['data-track'].value;
         var songArtist = song.attributes['data-artist'].value;
         var songAlbum = song.attributes['data-album'].value;
@@ -175,6 +178,7 @@ function scrapeTumblr() {
                           )
         permalink_url = "http://" + permalink_url.split('/')[0] + ".tumblr.com/post/" + permalink_url.split('/')[1];
         var songInfo = { title: songTitle, artist: songArtist, album: songAlbum, permalink_url: permalink_url };
+          console.log('songINfo...', songInfo, permalink_url);
         $.ajax({ url: permalink_url }).done(function(result){
           var iframe = result.substring(result.indexOf('<iframe class="tumblr_audio_player'), result.indexOf('</iframe>') + 9);
           var iframeSrc = iframe.substring(iframe.indexOf('src="') + 5, iframe.indexOf('" frameborder='));
@@ -185,7 +189,7 @@ function scrapeTumblr() {
           })
         })
       }
-    }
+    }) /**/
   }
 }
 
