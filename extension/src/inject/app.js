@@ -9,6 +9,14 @@ var ytAPI = "AIzaSyC_eZm_iimb5fx5So3Bt4h96ZuKQqd7ARU";
 // args: {_id:'123456'}
 //})
 
+// $(".play-ctrl:first").trigger("click")
+// [5:17 PM] LuckySpammer:
+// '/serve/source/' + window.playList['tracks'][track].id + '/' + window.playList['tracks'][track].key
+
+// that will give you a URL you can make an AJAX call to.
+
+// Which will respond with the URL to track.
+
 modules.on('init', init)
 
 function init() {
@@ -60,7 +68,7 @@ function scrapeEmbed() {
           if(youtubeIDs.indexOf(videoID) < 0) { //tests to see if we've checked this iframe yet
             youtubeIDs += videoID;
             $.ajax({
-                      url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
+                      url: '192.168.1.121:9000/api/youtubes/' + videoID,
                       type: 'GET'
                   })
                   .done(function(result){
@@ -88,7 +96,7 @@ function scrapeEmbed() {
                 if(youtubeIDs.indexOf(videoID) < 0) { //tests to see if we've checked this iframe yet
                   youtubeIDs += videoID;
                   $.ajax({
-                            url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
+                            url: '192.168.1.121:9000/api/youtubes/' + videoID,
                             type: 'GET'
                         })
                         .done(function(result){
