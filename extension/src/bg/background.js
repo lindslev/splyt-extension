@@ -1,6 +1,6 @@
 //PUT YOUR IP ADDRESS HERE with http:// in front of it. It's important, at least for DEV environments.
 //When you're in production, make sure that your production url's reflected here.
-var Splyt = new Splyt('http://192.168.1.121:9000');
+var Splyt = new Splyt('192.168.1.121:9000');
 
 // Splyt is essentially a resource at this point and you can run methods on it like:
 // Splyt.Endpoint().GET(arguments,callback);
@@ -10,66 +10,103 @@ var Splyt = new Splyt('http://192.168.1.121:9000');
 // method - get,post,update, or delete.
 // args - an object containing the data you need to send in request body or params.
 
-var currentSongsOnPage = [];
+var currentSongsOnPage = [], currentPlaylistsOnPage = [], currentSpotPlaylistsOnPage = [];
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     console.log('did we receive a msg from the content?', message)
-    if(message.action == 'newSong') currentSongsOnPage.push(message.args);
-
-
-
-
-
-    /*** for talking to splytAPI & server ***/
-    //Given the message = {
-    //  action: 'Endpoint',
-    //  method: 'GET',
-    //  args: {
-    //    _id: '123456787'
-    //  }
-    // }
-
-    // Background.js will always send back an object with the action of the ORIGINAL message it was sent ('Endpoint' in this case), the data of the server response, and an err if any.
-    // chrome.tabs.sendMessage(sender.tab.id, {
-    //  action: message.action,
-    //  data: data,
-    //  err: err
-    // });
+    if(message.action == 'newSCSong') currentSongsOnPage.push(message.args);
+    if(message.action == 'newSCPlaylist') currentPlaylistsOnPage.push(message.args);
+    if(message.action == 'newYoutubeSong') {
+      if(message.method == 'general') {
+        message.args.song = {
+            permalink_url: "https://www.youtube.com/watch?v=" + message.args.info.items[0].id,
+            title: message.args.info.items[0].snippet.title
+        }
+      }
+      currentSongsOnPage.push(message.args)
+    }
+    if(message.action == 'newSpotifySong') {
+      message.args.song = {
+        permalink_url: message.args.info.external_urls.spotify,
+        title: message.args.info.name
+      }
+      currentSongsOnPage.push(message.args);
+    }
+    if(message.action == 'newSpotifyPlaylist') {
+      currentSpotPlaylistsOnPage.push(message.args);
+    }
+    if(message.action == 'newTumblrSong') {
+      if(message.method == 'tumblog') {
+        message.args.song['permalink_url'] = message.args.iframeSrc.substring(
+                                                message.args.iframeSrc.indexOf('/post/' + 6),
+                                                message.args.iframeSrc.indexOf('/audio_player_iframe/')
+                                            );
+      }
+      currentSongsOnPage.push(message.args);
+    }
 })
 
 ////////////////////////////////////////////////////////////////////////
 // Whenever you open a new tab or go to a new page from an existing tab, and it finishes loading, send a message to that tab telling the app to initialize.
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-      if (changeInfo.status && changeInfo.status == 'complete') {
-        runChecks(tabId)
-      //   chrome.tabs.sendMessage(tabId, {
-      //       action: 'checkForEmbed',
-      //       err: null,
-      //       data: null
-      //   }, function(response) {
-      //       if (response) console.log(response);
-      //   });
-      }
-  })
+  if (changeInfo.status && changeInfo.status == 'complete') {
+    runChecks(tabId)
+  }
+  if(tab.url.match(/tumblr/g)) {
+    chrome.tabs.sendMessage(tabId, {
+      action: 'tumblrAudio',
+      err: null,
+      data: null
+    }, function(response){
+      if(response) console.log(response);
+    })
+  }
+  if(tab.url.match(/reddit/g)) {
+    chrome.tabs.sendMessage(tabId, {
+      action: 'redditAudio',
+      err: null,
+      data: null
+    }, function(response){
+      if(response) console.log(response);
+    })
+  }
+})
 
 /////////////////////////////////////////////
 // Fires when the active tab in a window changes
 chrome.tabs.onActivated.addListener(function(changeInfo){
-  console.log('inside onActivated', changeInfo.tabId)
   runChecks(changeInfo.tabId)
-  // chrome.tabs.sendMessage(changeInfo.tabId, {
-  //           action: 'checkForEmbed',
-  //           err: null,
-  //           data: null
-  //       }, function(response) {
-  //           console.log('inside response')
-  //           if (response) console.log(response);
-  //       });
+  chrome.tabs.query({}, function(tabs){
+    tabs.forEach(function(tab){
+      if(tab.id == changeInfo.tabId) {
+        if(tab.url.match(/tumblr/g)) {
+          chrome.tabs.sendMessage(changeInfo.tabId, {
+            action: 'tumblrAudio',
+            err: null,
+            data: null
+          }, function(response){
+            if(response) console.log(response);
+          })
+        }
+        if(tab.url.match(/reddit/g)) {
+          chrome.tabs.sendMessage(changeInfo.tabId, {
+            action: 'redditAudio',
+            err: null,
+            data: null
+          }, function(response){
+            if(response) console.log(response);
+          })
+        }
+      }
+    })
+  })
 })
 
 ///////////////////////////////////////////
 // Run checks on tab change && page load
 function runChecks(tabId) {
   currentSongsOnPage = [];
+  currentPlaylistsOnPage = [];
+  currentSpotPlaylistsOnPage = [];
   chrome.tabs.sendMessage(tabId, {
             action: 'checkForEmbed',
             err: null,
@@ -114,4 +151,12 @@ chrome.runtime.onMessageExternal.addListener(
 
 function currentSongs() {
   return currentSongsOnPage;
+}
+
+function currentPlaylists() {
+  return currentPlaylistsOnPage;
+}
+
+function currentSpotPlaylists() {
+  return currentSpotPlaylistsOnPage;
 }

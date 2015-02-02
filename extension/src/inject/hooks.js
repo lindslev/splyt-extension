@@ -32,7 +32,6 @@ modules = {
     },
     // Trigger a function registered via the on function.
     trigger: function(eventName, data) {
-        console.log('triggering', eventName, hooks);
         if (hooks[eventName]) {
             hooks[eventName].forEach(function(fn) {
                 fn(data);

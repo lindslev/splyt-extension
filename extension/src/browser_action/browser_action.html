@@ -8,12 +8,24 @@
 <script src="browser_action.js"></script>
 <body ng-app="splytApp">
   <div ng-controller="HomeCtrl" id="mainPopup">
-  <h1>Splyt</h1>
-  <ul>
-    <li ng-repeat="songObj in songs">
-      <a href="{{songObj.song.permalink_url}}" target="_blank">{{songObj.song.title}}</a>
-      <button ng-click="addSong(songObj)">Add</button>
-    </li>
-  </ul>
+    <h1>Splyt</h1>
+    <ul>
+      <p>Songs on Page</p>
+      <li ng-repeat="songObj in songs">
+        <a href="{{songObj.song.permalink_url}}" target="_blank">{{songObj.song.title}}</a>
+        <button ng-click="addSong(songObj)">Add</button>
+      </li>
+    </ul>
+    <ul ng-show="playlists.length || spotPlaylists.length">
+      <p>Playlists on Page</p>
+      <li ng-repeat="plObj in playlists">
+        <a href="{{plObj.playlist.permalink_url}}" target="_blank">{{plObj.playlist.title}}</a>
+        <button ng-click="addPlaylist(plObj)">Add</button>
+      </li>
+      <li ng-repeat="plObj in spotPlaylists">
+        <a href="{{plObj.playlist.permalink_url}}" target="_blank">{{plObj.playlist.user}}'s Spotify playlist</a>
+        <button ng-click="addPlaylist(plObj)">Add</button>
+      </li>
+    </ul>
   </div>
 </body>
