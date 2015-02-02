@@ -16,9 +16,11 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     if(message.action == 'newSCSong') currentSongsOnPage.push(message.args);
     if(message.action == 'newSCPlaylist') currentPlaylistsOnPage.push(message.args);
     if(message.action == 'newYoutubeSong') {
-      message.args.song = {
-          permalink_url: "https://www.youtube.com/watch?v=" + message.args.info.items[0].id,
-          title: message.args.info.items[0].snippet.title
+      if(message.method == 'general') {
+        message.args.song = {
+            permalink_url: "https://www.youtube.com/watch?v=" + message.args.info.items[0].id,
+            title: message.args.info.items[0].snippet.title
+        }
       }
       currentSongsOnPage.push(message.args)
     }
@@ -70,7 +72,16 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
       err: null,
       data: null
     }, function(response){
-      console.log('inside response', response)
+      if(response) console.log(response);
+    })
+  }
+  if(tab.url.match(/reddit/g)) {
+    chrome.tabs.sendMessage(tabId, {
+      action: 'redditAudio',
+      err: null,
+      data: null
+    }, function(response){
+      if(response) console.log(response);
     })
   }
 })
@@ -79,6 +90,30 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 // Fires when the active tab in a window changes
 chrome.tabs.onActivated.addListener(function(changeInfo){
   runChecks(changeInfo.tabId)
+  chrome.tabs.query({}, function(tabs){
+    tabs.forEach(function(tab){
+      if(tab.id == changeInfo.tabId) {
+        if(tab.url.match(/tumblr/g)) {
+          chrome.tabs.sendMessage(changeInfo.tabId, {
+            action: 'tumblrAudio',
+            err: null,
+            data: null
+          }, function(response){
+            if(response) console.log(response);
+          })
+        }
+        if(tab.url.match(/reddit/g)) {
+          chrome.tabs.sendMessage(changeInfo.tabId, {
+            action: 'redditAudio',
+            err: null,
+            data: null
+          }, function(response){
+            if(response) console.log(response);
+          })
+        }
+      }
+    })
+  })
 })
 
 ///////////////////////////////////////////

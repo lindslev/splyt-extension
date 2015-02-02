@@ -1,22 +1,3 @@
-var ytAPI = "AIzaSyC_eZm_iimb5fx5So3Bt4h96ZuKQqd7ARU";
-//modules.on('Endpoint',function(response){
-//response.err and response.data
-//})
-
-//modules.send({
-// action:"Endpoint"
-// method:"GET"
-// args: {_id:'123456'}
-//})
-
-// $(".play-ctrl:first").trigger("click")
-// [5:17 PM] LuckySpammer:
-// '/serve/source/' + window.playList['tracks'][track].id + '/' + window.playList['tracks'][track].key
-
-// that will give you a URL you can make an AJAX call to.
-
-// Which will respond with the URL to track.
-
 modules.on('init', init)
 
 function init() {
@@ -76,7 +57,7 @@ function scrapeEmbed() {
                     if(result.items[0].snippet.categoryId == '10') { //if music category
                       chrome.runtime.sendMessage({
                         action: 'newYoutubeSong',
-                        method: '',
+                        method: 'general',
                         args: { info : result, iframeSrc: src }
                       })
                     }
@@ -134,6 +115,13 @@ function scrapeEmbed() {
   } /** end key in iframes **/
 } /** end scrapeEmbed() **/
 
+
+////
+/***
+  ** start Tumblr **
+***/
+////
+
 modules.on('tumblrAudio', scrapeTumblr)
 
 function scrapeTumblr() {
@@ -170,7 +158,6 @@ function scrapeTumblr() {
                             song.attributes['data-stream-url'].value.indexOf('/tumblr_')
                           )
         permalink_url = "http://" + permalink_url.split('/')[0] + ".tumblr.com/post/" + permalink_url.split('/')[1];
-        console.log('perma', permalink_url)
         var songInfo = { title: songTitle, artist: songArtist, album: songAlbum, permalink_url: permalink_url };
         $.ajax({ url: permalink_url }).done(function(result){
           var iframe = result.substring(result.indexOf('<iframe class="tumblr_audio_player'), result.indexOf('</iframe>') + 9);
@@ -184,4 +171,45 @@ function scrapeTumblr() {
       }
     }
   }
+}
+
+////
+/***
+  ** start Reddit **
+***/
+////
+
+modules.on('redditAudio', scrapeReddit)
+
+function scrapeReddit() {
+  var things = $('.thing').not('.reddit-link', '.promotedlink');
+  things.each(function(){
+    var script = $(this).find('script');
+    var title = $(this).find('.title.may-blank.loggedin').text();
+    var href = $(this).find('.title.may-blank.loggedin').attr('href');
+    var iframe = unsafe(script.text().substring(script.text().indexOf('cache"] = ') + 12, script.text().length - 2));
+    var src = iframe.substring(iframe.indexOf('src="') + 5, iframe.indexOf('" id="'));
+    if(src) {
+      var song = { title: title, permalink_url: href }
+      if(href.match(/youtube/g)) {
+        chrome.runtime.sendMessage({
+          action: 'newYoutubeSong',
+          method: 'reddit',
+          args: { song : song, iframeSrc: src }
+        })
+      }
+      if(href.match(/soundcloud/g)) {
+        chrome.runtime.sendMessage({
+          action: 'newSCSong',
+          method: '',
+          args: { song : song, iframeSrc: src }
+        })
+      }
+    }
+  })
+}
+
+//unsafe fxn stolen from reddit lulz
+function unsafe(e) {
+  return typeof e == "string" && (e = e.replace(/&quot;/g, '"').replace(/&gt;/g, ">").replace(/&lt;/g, "<").replace(/&amp;/g, "&")), e || ""
 }
