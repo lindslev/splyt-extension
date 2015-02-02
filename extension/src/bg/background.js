@@ -16,11 +16,9 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     if(message.action == 'newSCSong') currentSongsOnPage.push(message.args);
     if(message.action == 'newSCPlaylist') currentPlaylistsOnPage.push(message.args);
     if(message.action == 'newYoutubeSong') {
-      if(message.method == 'general') {
-        message.args.song = {
-            permalink_url: "https://www.youtube.com/watch?v=" + message.args.info.items[0].id,
-            title: message.args.info.items[0].snippet.title
-        }
+      message.args.song = {
+          permalink_url: "https://www.youtube.com/watch?v=" + message.args.info.items[0].id,
+          title: message.args.info.items[0].snippet.title
       }
       currentSongsOnPage.push(message.args)
     }

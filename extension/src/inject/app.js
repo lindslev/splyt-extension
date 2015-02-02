@@ -58,13 +58,13 @@ function scrapeEmbed() {
                     if(result.items[0].snippet.categoryId == '10') { //if music category
                       chrome.runtime.sendMessage({
                         action: 'newYoutubeSong',
-                        method: 'general',
+                        method: '',
                         args: { info : result, iframeSrc: src }
                       })
                     }
                   })
           }
-        }
+        } /** end general youtube embeds **/
         /** for tumblr dashboard embedded youtubes**/
         if(iframe.outerHTML.match(/safe.txmblr/g) && iframe.outerHTML.match(/style="width/g)) {
           $.ajax({ url: iframe.src })
