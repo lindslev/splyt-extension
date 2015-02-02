@@ -192,10 +192,25 @@ function scrapeReddit() {
     if(src) {
       var song = { title: title, permalink_url: href }
       if(href.match(/youtube/g)) {
-        chrome.runtime.sendMessage({
-          action: 'newYoutubeSong',
-          method: 'reddit',
-          args: { song : song, iframeSrc: src }
+        if(href.indexOf('&') >= 0) {
+          var videoID = href.substring(href.indexOf('?v=') + 3, href.indexOf('&'))
+        } else {
+          var videoID = href.substring(href.indexOf('?v=') + 3, href.length);
+        }
+        $.ajax({
+            url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
+            type: 'GET'
+        })
+        .done(function(result){
+          result = JSON.parse(result);
+          if(result.items[0].snippet.categoryId == '10') { //if music category
+            song['info'] = result;
+            chrome.runtime.sendMessage({
+              action: 'newYoutubeSong',
+              method: 'reddit',
+              args: { song : song, iframeSrc: src }
+            })
+          }
         })
       }
       if(href.match(/soundcloud/g)) {
