@@ -16,10 +16,14 @@
         <button ng-click="addSong(songObj)">Add</button>
       </li>
     </ul>
-    <ul ng-show="playlists.length">
+    <ul ng-show="playlists.length || spotPlaylists.length">
       <p>Playlists on Page</p>
       <li ng-repeat="plObj in playlists">
         <a href="{{plObj.playlist.permalink_url}}" target="_blank">{{plObj.playlist.title}}</a>
+        <button ng-click="addPlaylist(plObj)">Add</button>
+      </li>
+      <li ng-repeat="plObj in spotPlaylists">
+        <a href="{{plObj.playlist.permalink_url}}" target="_blank">{{plObj.playlist.user}}'s Spotify playlist</a>
         <button ng-click="addPlaylist(plObj)">Add</button>
       </li>
     </ul>

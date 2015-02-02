@@ -9,6 +9,7 @@ angular.module('splytApp', [])
   .controller('HomeCtrl', function ($http, $scope, $timeout) {
     $scope.songs = currentPage.currentSongs();
     $scope.playlists = currentPage.currentPlaylists();
+    $scope.spotPlaylists = currentPage.currentSpotPlaylists();
     $scope.addSong = function(song) {
       console.log('adding song', song);
     }

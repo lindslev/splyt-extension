@@ -10,7 +10,7 @@ var Splyt = new Splyt('192.168.1.121:9000');
 // method - get,post,update, or delete.
 // args - an object containing the data you need to send in request body or params.
 
-var currentSongsOnPage = [], currentPlaylistsOnPage = [];
+var currentSongsOnPage = [], currentPlaylistsOnPage = [], currentSpotPlaylistsOnPage = [];
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     console.log('did we receive a msg from the content?', message)
     if(message.action == 'newSCSong') currentSongsOnPage.push(message.args);
@@ -31,6 +31,9 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
       }
       currentSongsOnPage.push(message.args);
     }
+    if(message.action == 'newSpotifyPlaylist') {
+      currentSpotPlaylistsOnPage.push(message.args);
+    }
     if(message.action == 'newTumblrSong') {
       if(message.method == 'tumblog') {
         message.args.song['permalink_url'] = message.args.iframeSrc.substring(
@@ -40,24 +43,6 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
       }
       currentSongsOnPage.push(message.args);
     }
-
-
-
-    /*** for talking to splytAPI & server ***/
-    //Given the message = {
-    //  action: 'Endpoint',
-    //  method: 'GET',
-    //  args: {
-    //    _id: '123456787'
-    //  }
-    // }
-
-    // Background.js will always send back an object with the action of the ORIGINAL message it was sent ('Endpoint' in this case), the data of the server response, and an err if any.
-    // chrome.tabs.sendMessage(sender.tab.id, {
-    //  action: message.action,
-    //  data: data,
-    //  err: err
-    // });
 })
 
 ////////////////////////////////////////////////////////////////////////
@@ -121,6 +106,7 @@ chrome.tabs.onActivated.addListener(function(changeInfo){
 function runChecks(tabId) {
   currentSongsOnPage = [];
   currentPlaylistsOnPage = [];
+  currentSpotPlaylistsOnPage = [];
   chrome.tabs.sendMessage(tabId, {
             action: 'checkForEmbed',
             err: null,
@@ -169,4 +155,8 @@ function currentSongs() {
 
 function currentPlaylists() {
   return currentPlaylistsOnPage;
+}
+
+function currentSpotPlaylists() {
+  return currentSpotPlaylistsOnPage;
 }

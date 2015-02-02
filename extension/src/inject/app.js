@@ -9,6 +9,7 @@ modules.on('checkForEmbed', scrapeEmbed)
 function scrapeEmbed() {
   var iframes = document.getElementsByTagName('iframe');
   var youtubeIDs = ""; //tracks which ids we've sent to the background script already
+  var spotifyUsers = ""; //tracks which user playlists we've sent already
 
   for(var key in iframes) {
     var iframe = iframes[key];
@@ -70,7 +71,6 @@ function scrapeEmbed() {
             .done(function(result){
               var iframe = result.substring(result.indexOf('<iframe'), (result.indexOf('</iframe>') + 9));
               if(iframe.match(/youtube/g)) {
-                console.log('iframes matching safetxmblr', iframe)
                 var src = iframe.substring(iframe.indexOf('src="'), iframe.indexOf('" frameborder'));
                 src = decodeURIComponent(src);
                 var videoID = src.split('/embed/')[1].split('?')[0];
@@ -97,18 +97,34 @@ function scrapeEmbed() {
         /** end youtube embeds **/
         if(iframe.outerHTML.match(/spotify/g)) {
           var src2 = decodeURIComponent(iframe.src);
-          var spotTrackId = src2.split(':track:')[1].split('&')[0];
-          $.ajax({
-              url: 'https://api.spotify.com/v1/tracks/' + spotTrackId,
-              type: 'GET'
-            })
-            .done(function(track){
-              chrome.runtime.sendMessage({
-                action: 'newSpotifySong',
-                method: '',
-                args: { info: track, iframeSrc: src2 }
+          if(src2.split(':track:').length > 1) {
+            var spotTrackId = src2.split(':track:')[1].split('&')[0];
+            $.ajax({
+                url: 'https://api.spotify.com/v1/tracks/' + spotTrackId,
+                type: 'GET'
               })
-            })
+              .done(function(track){
+                chrome.runtime.sendMessage({
+                  action: 'newSpotifySong',
+                  method: '',
+                  args: { info: track, iframeSrc: src2 }
+                })
+              })
+          } /** end spotify track embeds **/
+          if(src2.split(':playlist:').length > 1) {
+            var spotPLId = src2.split(':playlist:')[1].split('&')[0];
+            var spotPLUserId = src2.split(':playlist:')[0].split(':user:')[1];
+            if(spotifyUsers.indexOf(spotPLUserId) < 0) {
+              spotifyUsers += spotPLUserId;
+              var permalink_url = "http://open.spotify.com/user/" + spotPLUserId + "/playlist/" + spotPLId;
+              var playlist = { permalink_url: permalink_url, user: spotPLUserId }
+              chrome.runtime.sendMessage({
+                  action: 'newSpotifyPlaylist',
+                  method: '',
+                  args: { playlist: playlist, iframeSrc: src2 }
+                })
+            }
+          } /** end spotify playlist embeds **/
         } /**end spotify embeds **/
 
     } /** end if(iframe.outerHTML)**/
