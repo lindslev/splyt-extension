@@ -16,9 +16,12 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     if(message.action == 'newSCSong') currentSongsOnPage.push(message.args);
     if(message.action == 'newSCPlaylist') currentPlaylistsOnPage.push(message.args);
     if(message.action == 'newYoutubeSong') {
-      message.args.song = {
-          permalink_url: "https://www.youtube.com/watch?v=" + message.args.info.items[0].id,
-          title: message.args.info.items[0].snippet.title
+      if(message.method == 'general') { //general embeds, dont need to do this for reddit embeds
+        message.args.song = {
+            permalink_url: "https://www.youtube.com/watch?v=" + message.args.info.items[0].id,
+            title: message.args.info.items[0].snippet.title
+        }
+        console.log('message.args.song', message.args.song, message.args.info);
       }
       currentSongsOnPage.push(message.args)
     }
@@ -67,6 +70,15 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
       if(response) console.log(response);
     })
   }
+  if(tab.url.match(/facebook/g)) {
+    chrome.tabs.sendMessage(tabId, {
+      action: 'facebookAudio',
+      err: null,
+      data: null
+    }, function(response){
+      if(response) console.log(response);
+    })
+  }
 })
 
 /////////////////////////////////////////////
@@ -88,6 +100,15 @@ chrome.tabs.onActivated.addListener(function(changeInfo){
         if(tab.url.match(/reddit/g)) {
           chrome.tabs.sendMessage(changeInfo.tabId, {
             action: 'redditAudio',
+            err: null,
+            data: null
+          }, function(response){
+            if(response) console.log(response);
+          })
+        }
+        if(tab.url.match(/facebook/g)) {
+          chrome.tabs.sendMessage(changeInfo.tabId, {
+            action: 'facebookAudio',
             err: null,
             data: null
           }, function(response){
