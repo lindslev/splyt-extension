@@ -79,6 +79,16 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
       if(response) console.log(response);
     })
   }
+  if(tab.url.match(/youtube/g)) {
+    console.log('*******')
+    chrome.tabs.sendMessage(tabId, {
+      action: 'youtubeNative',
+      err: null,
+      data: null
+    }, function(response){
+      if(response) console.log(response);
+    })
+  }
 })
 
 /////////////////////////////////////////////
@@ -109,6 +119,16 @@ chrome.tabs.onActivated.addListener(function(changeInfo){
         if(tab.url.match(/facebook/g)) {
           chrome.tabs.sendMessage(changeInfo.tabId, {
             action: 'facebookAudio',
+            err: null,
+            data: null
+          }, function(response){
+            if(response) console.log(response);
+          })
+        }
+        if(tab.url.match(/youtube/g)) {
+          console.log('*******')
+          chrome.tabs.sendMessage(changeInfo.tabId, {
+            action: 'youtubeNative',
             err: null,
             data: null
           }, function(response){

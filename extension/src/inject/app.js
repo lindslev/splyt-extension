@@ -7,6 +7,9 @@ function init() {
 modules.on('checkForEmbed', scrapeEmbed)
 
 function scrapeEmbed() {
+
+  var domain = document.domain.replace(/\./g, '+') + window.location.pathname.replace(/\//g, '+');
+
   var iframes = document.getElementsByTagName('iframe');
   var youtubeIDs = ""; //tracks which ids we've sent to the background script already
   var spotifyUsers = ""; //tracks which user playlists we've sent already
@@ -44,7 +47,7 @@ function scrapeEmbed() {
               });
           }
         } /** end soundcloud embeds **/
-        if(iframe.outerHTML.match(/youtube/g)) {
+        if(iframe.outerHTML.match(/youtube/g) && !domain.match(/youtube/g)) {
           var src = decodeURIComponent(iframe.src)
           var videoID = src.split('/embed/')[1].split('?')[0];
           if(youtubeIDs.indexOf(videoID) < 0) { //tests to see if we've checked this iframe yet
@@ -259,10 +262,8 @@ modules.on('facebookAudio', _.debounce(scrapeFacebook, 2000))
 
 function scrapeFacebook() {
   var holder = []; //dont resend msg if we already did for this song
-  console.log('getting called twice?')
   function scrape() {
     var embeds = $('.lfloat > span > div > div > a');
-    console.log('embeds', embeds);
     embeds.each(function(){
       var href = decodeURIComponent($(this).attr('href'));
       var outerHTML = this.outerHTML;
@@ -285,7 +286,6 @@ function scrapeFacebook() {
       if(outerHTML.match(/youtube/g)) {
         songTitle = outerHTML.split('aria-label="')[1].split('" ajaxify=')[0];
         videoID = href.split('watch?v=')[1].split('&')[0];
-        console.log('inside embed YT', videoID, holder)
         if(holder.indexOf(videoID) < 0) {
           holder.push(videoID);
           $.ajax({
@@ -312,3 +312,76 @@ function scrapeFacebook() {
     $(window).off('scroll', debounceScrape);
   })
 }
+
+////
+/***
+  ** start YouTube **
+***/
+////
+
+modules.on('youtubeNative', _.debounce(scrapeYoutube, 200))
+
+function scrapeYoutube() {
+  //home page and search page
+  var vids = $('.yt-lockup-title');
+  vids.each(function(){
+    var outerHTML = this.outerHTML;
+    var videoID = outerHTML.split('watch?v=')[1].split('"')[0];
+    var title = outerHTML.split('title="')[1].split('"')[0];
+    $.ajax({
+          url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
+          type: 'GET'
+      })
+      .done(function(result){
+        result = JSON.parse(result);
+        if(result.items[0].snippet.categoryId == '10') { //if music category
+            chrome.runtime.sendMessage({
+              action: 'newYoutubeSong',
+              method: 'general',
+              args: { info : result, iframeSrc: null }
+            })
+        }
+      })
+  })
+
+  //watching a single vid
+  var video = $('#watch7-content');
+  video.each(function(){
+    var videoID = this.innerHTML.split('itemprop="videoId" content="')[1].split('">')[0];
+    $.ajax({
+          url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
+          type: 'GET'
+      })
+      .done(function(result){
+        result = JSON.parse(result);
+        if(result.items[0].snippet.categoryId == '10') { //if music category
+            chrome.runtime.sendMessage({
+              action: 'newYoutubeSong',
+              method: 'general',
+              args: { info : result, iframeSrc: null }
+            })
+        }
+      })
+  })
+
+  //recommended vids on a song page
+  var thumbVids = $('.thumb-link');
+  thumbVids.each(function(){
+    var videoID = $(this).attr('href').split("?v=")[1];
+    $.ajax({
+            url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
+            type: 'GET'
+        })
+        .done(function(result){
+          result = JSON.parse(result);
+          if(result.items[0].snippet.categoryId == '10') { //if music category
+              chrome.runtime.sendMessage({
+                action: 'newYoutubeSong',
+                method: 'general',
+                args: { info : result, iframeSrc: null }
+              })
+          }
+        })
+  })
+}
+
