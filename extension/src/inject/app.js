@@ -1,20 +1,40 @@
-if(domainName().match(/soundcloud/g)) {
-  chrome.runtime.sendMessage({
-    action: 'soundcloudLoading',
-    method: '',
-    args : {}
-  })
-}
-
 modules.on('init', init)
 
 function init() {
   console.log('app initialized')
 }
+///////////////////////////////////////////
+//            HELPER FUNCTIONS           //
+///////////////////////////////////////////
+function isValidEntertainment(id, title, desc) { //checks youtube ent category and corresponding keywords
+  return ['5', '8', '18', '24'].indexOf(id) >= 0 &&
+  (desc.match(/lyrics/g) || desc.match(/music/g) || title.match(/audio/g) || title.match(/lyrics/g) || title.match(/remix/g));
+}
+
+function isMusic(id) { //checks youtube music category
+  return id == '10';
+}
 
 function domainName() {
   return document.domain.replace(/\./g, '+') + window.location.pathname.replace(/\//g, '+');
 }
+
+function calledYoutubeAPI(result, src) {
+  result = JSON.parse(result);
+  var catId = result.items[0].snippet.categoryId,
+      desc = result.items[0].snippet.description,
+      title = result.items[0].snippet.title;
+  if(isMusic(catId) || isValidEntertainment(catId, title, desc)) { //if music category or entertainment song
+    chrome.runtime.sendMessage({
+      action: 'newYoutubeSong',
+      method: 'general',
+      args: { info : result, iframeSrc: src }
+    })
+  }
+}
+////////////// END HELPERS ////////////
+
+
 ////
 /***
   ** start general embeds **
@@ -75,14 +95,18 @@ function scrapeEmbed() {
                       type: 'GET'
                   })
                   .done(function(result){
-                    result = JSON.parse(result);
-                    if(result.items[0].snippet.categoryId == '10') { //if music category
-                      chrome.runtime.sendMessage({
-                        action: 'newYoutubeSong',
-                        method: 'general',
-                        args: { info : result, iframeSrc: src }
-                      })
-                    }
+                    calledYoutubeAPI(result, src);
+                    // result = JSON.parse(result);
+                    // var catId = result.items[0].snippet.categoryId,
+                    //     desc = result.items[0].snippet.description,
+                    //     title = result.items[0].snippet.title;
+                    // if(isMusic(catId) || isValidEntertainment(catId, title, desc)) { //if music category or entertainment song
+                    //   chrome.runtime.sendMessage({
+                    //     action: 'newYoutubeSong',
+                    //     method: 'general',
+                    //     args: { info : result, iframeSrc: src }
+                    //   })
+                    // }
                   })
           }
         } /** end general youtube embeds **/
@@ -440,6 +464,14 @@ function scrapeYoutube() {
   ** start Soundcloud **
 ***/
 ////
+if(domainName().match(/soundcloud/g)) {
+  chrome.runtime.sendMessage({
+    action: 'soundcloudLoading',
+    method: '',
+    args : {}
+  })
+}
+
 modules.on('soundcloudNative', _.debounce(scrapeSoundcloud, 200))
 
 function scrapeSoundcloud() {

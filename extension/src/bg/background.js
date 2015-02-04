@@ -59,6 +59,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         })
       })
     }
+    chrome.browserAction.setBadgeText({ text : currentSongsOnPage.length.toString() });
 })
 
 ////////////////////////////////////////////////////////////////////////
