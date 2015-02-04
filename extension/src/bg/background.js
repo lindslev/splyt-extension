@@ -80,7 +80,6 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     })
   }
   if(tab.url.match(/youtube/g)) {
-    console.log('*******')
     chrome.tabs.sendMessage(tabId, {
       action: 'youtubeNative',
       err: null,
@@ -89,6 +88,19 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
       if(response) console.log(response);
     })
   }
+  if(tab.url.match(/soundcloud/g)) {
+    function send() {
+      chrome.tabs.sendMessage(tabId, {
+        action: 'soundcloudNative',
+        err: null,
+        data: null
+      }, function(response){
+        if(response) console.log(response);
+      })
+    }
+    setTimeout(send, 5000); /**NEED TO FIX THIS**/
+  }
+
 })
 
 /////////////////////////////////////////////
@@ -126,9 +138,18 @@ chrome.tabs.onActivated.addListener(function(changeInfo){
           })
         }
         if(tab.url.match(/youtube/g)) {
-          console.log('*******')
           chrome.tabs.sendMessage(changeInfo.tabId, {
             action: 'youtubeNative',
+            err: null,
+            data: null
+          }, function(response){
+            if(response) console.log(response);
+          })
+        }
+        if(tab.url.match(/soundcloud/g)) {
+          console.log('test...')
+          chrome.tabs.sendMessage(changeInfo.tabId, {
+            action: 'soundcloudNative',
             err: null,
             data: null
           }, function(response){
@@ -151,7 +172,6 @@ function runChecks(tabId) {
             err: null,
             data: null
         }, function(response) {
-            console.log('inside response')
             if (response) console.log(response);
         });
 }
