@@ -44,6 +44,21 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
       }
       currentSongsOnPage.push(message.args);
     }
+    if(message.action == 'soundcloudLoading') { //get tabs for domain fxn
+      chrome.tabs.query({}, function(tabs){
+        tabs.forEach(function(tab){
+          if(tab.url.match(/soundcloud/g)) {
+            chrome.tabs.sendMessage(tab.id, {
+              action: 'soundcloudNative',
+              err: null,
+              data: null
+            }, function(response){
+              if(response) console.log(response);
+            })
+          }
+        })
+      })
+    }
 })
 
 ////////////////////////////////////////////////////////////////////////
@@ -89,16 +104,16 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     })
   }
   if(tab.url.match(/soundcloud/g)) {
-    function send() {
-      chrome.tabs.sendMessage(tabId, {
-        action: 'soundcloudNative',
-        err: null,
-        data: null
-      }, function(response){
-        if(response) console.log(response);
-      })
-    }
-    setTimeout(send, 5000); /**NEED TO FIX THIS**/
+    // function send() {
+    //   chrome.tabs.sendMessage(tabId, {
+    //     action: 'soundcloudNative',
+    //     err: null,
+    //     data: null
+    //   }, function(response){
+    //     if(response) console.log(response);
+    //   })
+    // }
+    // setTimeout(send, 5000); /**NEED TO FIX THIS**/
   }
   if(tab.url.match(/twitter/g)) {
     console.log('****')

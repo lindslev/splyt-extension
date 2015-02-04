@@ -1,9 +1,20 @@
+if(domainName().match(/soundcloud/g)) {
+  chrome.runtime.sendMessage({
+    action: 'soundcloudLoading',
+    method: '',
+    args : {}
+  })
+}
+
 modules.on('init', init)
 
 function init() {
   console.log('app initialized')
 }
 
+function domainName() {
+  return document.domain.replace(/\./g, '+') + window.location.pathname.replace(/\//g, '+');
+}
 ////
 /***
   ** start general embeds **
