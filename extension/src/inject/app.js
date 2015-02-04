@@ -19,7 +19,11 @@ function domainName() {
   return document.domain.replace(/\./g, '+') + window.location.pathname.replace(/\//g, '+');
 }
 
-function calledYoutubeAPI(result, src) {
+function unsafe(e) { //unsafe fxn stolen from reddit lulz
+  return typeof e == "string" && (e = e.replace(/&quot;/g, '"').replace(/&gt;/g, ">").replace(/&lt;/g, "<").replace(/&amp;/g, "&")), e || ""
+}
+
+function calledYoutubeAPI(result, src) { //called with result and (iframe) src when /api/youtubes is requested
   result = JSON.parse(result);
   var catId = result.items[0].snippet.categoryId,
       desc = result.items[0].snippet.description,
@@ -96,17 +100,6 @@ function scrapeEmbed() {
                   })
                   .done(function(result){
                     calledYoutubeAPI(result, src);
-                    // result = JSON.parse(result);
-                    // var catId = result.items[0].snippet.categoryId,
-                    //     desc = result.items[0].snippet.description,
-                    //     title = result.items[0].snippet.title;
-                    // if(isMusic(catId) || isValidEntertainment(catId, title, desc)) { //if music category or entertainment song
-                    //   chrome.runtime.sendMessage({
-                    //     action: 'newYoutubeSong',
-                    //     method: 'general',
-                    //     args: { info : result, iframeSrc: src }
-                    //   })
-                    // }
                   })
           }
         } /** end general youtube embeds **/
@@ -126,14 +119,7 @@ function scrapeEmbed() {
                             type: 'GET'
                         })
                         .done(function(result){
-                          result = JSON.parse(result);
-                          if(result.items[0].snippet.categoryId == '10') { //if music category
-                            chrome.runtime.sendMessage({
-                              action: 'newYoutubeSong',
-                              method: 'general',
-                              args: { info : result, iframeSrc: src }
-                            })
-                          }
+                          calledYoutubeAPI(result, src);
                         })
                 }
               }
@@ -262,9 +248,10 @@ modules.on('redditAudio', scrapeReddit)
 function scrapeReddit() {
   var things = $('.thing').not('.reddit-link', '.promotedlink');
   things.each(function(){
-    var script = $(this).find('script');
-    var title = $(this).find('.title.may-blank.loggedin').text();
-    var href = $(this).find('.title.may-blank.loggedin').attr('href');
+    var $this = $(this);
+    var script = $this.find('script');
+    var title = $this.find('.title.may-blank.loggedin').text();
+    var href = $this.find('.title.may-blank.loggedin').attr('href');
     var iframe = unsafe(script.text().substring(script.text().indexOf('cache"] = ') + 12, script.text().length - 2));
     var src = iframe.substring(iframe.indexOf('src="') + 5, iframe.indexOf('" id="'));
     if(src) {
@@ -280,15 +267,7 @@ function scrapeReddit() {
             type: 'GET'
         })
         .done(function(result){
-          result = JSON.parse(result);
-          if(result.items[0].snippet.categoryId == '10') { //if music category
-            song['info'] = result;
-            chrome.runtime.sendMessage({
-              action: 'newYoutubeSong',
-              method: 'reddit',
-              args: { song : song, iframeSrc: src }
-            })
-          }
+          calledYoutubeAPI(result, src);
         })
       }
       if(href.match(/soundcloud/g)) {
@@ -300,11 +279,6 @@ function scrapeReddit() {
       }
     }
   })
-}
-
-//unsafe fxn stolen from reddit lulz
-function unsafe(e) {
-  return typeof e == "string" && (e = e.replace(/&quot;/g, '"').replace(/&gt;/g, ">").replace(/&lt;/g, "<").replace(/&amp;/g, "&")), e || ""
 }
 
 ////
@@ -348,14 +322,7 @@ function scrapeFacebook() {
               type: 'GET'
           })
           .done(function(result){
-            result = JSON.parse(result);
-            if(result.items[0].snippet.categoryId == '10') { //if music category
-                chrome.runtime.sendMessage({
-                  action: 'newYoutubeSong',
-                  method: 'general',
-                  args: { info : result, iframeSrc: null }
-                })
-            }
+            calledYoutubeAPI(result, null);
           })
         }
       }
@@ -393,14 +360,7 @@ function scrapeYoutube() {
               type: 'GET'
           })
           .done(function(result){
-            result = JSON.parse(result);
-            if(result.items[0].snippet.categoryId == '10') { //if music category
-                chrome.runtime.sendMessage({
-                  action: 'newYoutubeSong',
-                  method: 'general',
-                  args: { info : result, iframeSrc: null }
-                })
-            }
+            calledYoutubeAPI(result, null);
           })
       }
     })
@@ -416,14 +376,7 @@ function scrapeYoutube() {
               type: 'GET'
           })
           .done(function(result){
-            result = JSON.parse(result);
-            if(result.items[0].snippet.categoryId == '10') { //if music category
-                chrome.runtime.sendMessage({
-                  action: 'newYoutubeSong',
-                  method: 'general',
-                  args: { info : result, iframeSrc: null }
-                })
-            }
+            calledYoutubeAPI(result, null);
           })
       }
     })
@@ -439,14 +392,7 @@ function scrapeYoutube() {
                 type: 'GET'
             })
             .done(function(result){
-              result = JSON.parse(result);
-              if(result.items[0].snippet.categoryId == '10') { //if music category
-                  chrome.runtime.sendMessage({
-                    action: 'newYoutubeSong',
-                    method: 'general',
-                    args: { info : result, iframeSrc: null }
-                  })
-              }
+              calledYoutubeAPI(result, null);
             })
       }
     })
@@ -551,7 +497,6 @@ function scrapeTwitter() {
       var url = decodeURIComponent(this.outerHTML.split('data-source-url="')[1].split('"')[0]);
       if(url.match(/soundcloud/g)) {
         if(holder.indexOf(url) < 0) {
-          console.log('soundcloud url', url)
           holder.push(url);
           /** soundcloud track embeds **/
           if(url.split('tracks/').length == 2) {
@@ -583,7 +528,6 @@ function scrapeTwitter() {
       }
       if(url.match(/youtube/g)) {
         if(holder.indexOf(url) < 0) {
-          console.log('youtube url', url)
           holder.push(url);
           var videoID = url.split('/embed/')[1];
           $.ajax({
@@ -591,14 +535,7 @@ function scrapeTwitter() {
               type: 'GET'
           })
           .done(function(result){
-            result = JSON.parse(result);
-            if(result.items[0].snippet.categoryId == '10') { //if music category
-                chrome.runtime.sendMessage({
-                  action: 'newYoutubeSong',
-                  method: 'general',
-                  args: { info : result, iframeSrc: null }
-                })
-            }
+            calledYoutubeAPI(result, null);
           })
         }
       }
