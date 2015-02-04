@@ -447,3 +447,73 @@ function scrapeSoundcloud() {
   ** start Twitter **
 ***/
 ////
+
+modules.on('twitterAudio', _.debounce(scrapeTwitter, 500))
+
+function scrapeTwitter() {
+  var holder = []; //dont resend msg if we already did for this song
+  function scrape() {
+    var media = $('.media-preview');
+    media.each(function(){
+      var url = decodeURIComponent(this.outerHTML.split('data-source-url="')[1].split('"')[0]);
+      if(url.match(/soundcloud/g)) {
+        if(holder.indexOf(url) < 0) {
+          console.log('soundcloud url', url)
+          holder.push(url);
+          /** soundcloud track embeds **/
+          if(url.split('tracks/').length == 2) {
+            var scTrackId = url.split('tracks/')[1].split(/[\?\&]/)[0];
+            var url = "https://api.soundcloud.com/tracks/" + scTrackId + "?client_id=7af759eb774be5664395ed9afbd09c46&format=json";
+            $.ajax({url: url})
+              .done(function(song){
+                  chrome.runtime.sendMessage({
+                    action: 'newSCSong',
+                    method: '',
+                    args: { song : song, iframeSrc: url }
+                  })
+              });
+          }
+          /** soundcloud playlist embeds **/
+          if(url.split('playlists/').length == 2) {
+            var scPlaylistId = url.split('playlists/')[1].split(/[\?\&]/)[0];
+            var url = "https://api.soundcloud.com/playlists/" + scPlaylistId + "?client_id=7af759eb774be5664395ed9afbd09c46&format=json";
+            $.ajax({url: url})
+              .done(function(playlist){
+                  chrome.runtime.sendMessage({
+                    action: 'newSCPlaylist',
+                    method: '',
+                    args: { playlist: playlist, iframeSrc: url }
+                  })
+              });
+          }
+        }
+      }
+      if(url.match(/youtube/g)) {
+        if(holder.indexOf(url) < 0) {
+          console.log('youtube url', url)
+          holder.push(url);
+          var videoID = url.split('/embed/')[1];
+          $.ajax({
+              url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
+              type: 'GET'
+          })
+          .done(function(result){
+            result = JSON.parse(result);
+            if(result.items[0].snippet.categoryId == '10') { //if music category
+                chrome.runtime.sendMessage({
+                  action: 'newYoutubeSong',
+                  method: 'general',
+                  args: { info : result, iframeSrc: null }
+                })
+            }
+          })
+        }
+      }
+    })
+  }
+  var debounceScrape = _.debounce(scrape, 500);
+  $(window).on('scroll', debounceScrape);
+  modules.on('checkForEmbed', function() {
+    $(window).off('scroll', debounceScrape);
+  })
+}

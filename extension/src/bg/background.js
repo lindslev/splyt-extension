@@ -100,7 +100,16 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     }
     setTimeout(send, 5000); /**NEED TO FIX THIS**/
   }
-
+  if(tab.url.match(/twitter/g)) {
+    console.log('****')
+    chrome.tabs.sendMessage(tabId, {
+      action: 'twitterAudio',
+      err: null,
+      data: null
+    }, function(response){
+      if(response) console.log(response);
+    })
+  }
 })
 
 /////////////////////////////////////////////
@@ -150,6 +159,16 @@ chrome.tabs.onActivated.addListener(function(changeInfo){
           console.log('test...')
           chrome.tabs.sendMessage(changeInfo.tabId, {
             action: 'soundcloudNative',
+            err: null,
+            data: null
+          }, function(response){
+            if(response) console.log(response);
+          })
+        }
+        if(tab.url.match(/twitter/g)) {
+          console.log('tesssst')
+          chrome.tabs.sendMessage(changeInfo.tabId, {
+            action: 'twitterAudio',
             err: null,
             data: null
           }, function(response){
