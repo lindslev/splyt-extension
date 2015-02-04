@@ -103,18 +103,6 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
       if(response) console.log(response);
     })
   }
-  if(tab.url.match(/soundcloud/g)) {
-    // function send() {
-    //   chrome.tabs.sendMessage(tabId, {
-    //     action: 'soundcloudNative',
-    //     err: null,
-    //     data: null
-    //   }, function(response){
-    //     if(response) console.log(response);
-    //   })
-    // }
-    // setTimeout(send, 5000); /**NEED TO FIX THIS**/
-  }
   if(tab.url.match(/twitter/g)) {
     console.log('****')
     chrome.tabs.sendMessage(tabId, {

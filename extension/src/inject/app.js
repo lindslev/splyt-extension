@@ -162,56 +162,69 @@ function scrapeEmbed() {
 modules.on('tumblrAudio', _.debounce(scrapeTumblr, 200))
 
 function scrapeTumblr() {
-  var added = ""; //tracks songs we've sent already
-  console.log('is this getting called twice?')
-  var songs = document.getElementsByClassName('tumblr_audio_player'); //diff format depending on whether youre looking at someone's blog
-  var dashSongs = document.getElementsByClassName('audio_player_container'); //or actually in the tumblr dash
-  if(songs.length !== 0) {
-    Object.keys(songs).forEach(function(key){
-    // for(var key in songs){
-      if(typeof songs[key] == 'object') {
-        var song = songs[key];
-        var src = decodeURIComponent(song.src);
-        $.ajax({ url: song.src }).done(function(result){
-          var songTitle = result.substring(result.indexOf('data-track="') + 12, result.indexOf('data-artist=') - 6);
-          var songArtist = result.substring(result.indexOf('data-artist="') + 13, result.indexOf('data-album=') - 6);
-          var songAlbum = result.substring(result.indexOf('data-album="') + 12, result.indexOf('data-service=') - 6);
-          var song = { title: songTitle, artist: songArtist, album: songAlbum };
-          chrome.runtime.sendMessage({
-            action: 'newTumblrSong',
-            method: 'tumblog',
-            args: { song: song, iframeSrc: src }
-          })
-        })
-      }
-    })
+  var holder = []; //tracks songs we've sent already
+  function scrape() {
+    var songs = document.getElementsByClassName('tumblr_audio_player'); //diff format depending on whether youre looking at someone's blog
+    var dashSongs = document.getElementsByClassName('audio_player_container'); //or actually in the tumblr dash
+    if(songs.length !== 0) {
+      Object.keys(songs).forEach(function(key){
+      // for(var key in songs){
+        if(typeof songs[key] == 'object') {
+          var song = songs[key];
+          var src = decodeURIComponent(song.src);
+          if(holder.indexOf(src) < 0) {
+            holder.push(src);
+            $.ajax({ url: song.src }).done(function(result){
+              var songTitle = result.substring(result.indexOf('data-track="') + 12, result.indexOf('data-artist=') - 6);
+              var songArtist = result.substring(result.indexOf('data-artist="') + 13, result.indexOf('data-album=') - 6);
+              var songAlbum = result.substring(result.indexOf('data-album="') + 12, result.indexOf('data-service=') - 6);
+              var song = { title: songTitle, artist: songArtist, album: songAlbum };
+              chrome.runtime.sendMessage({
+                action: 'newTumblrSong',
+                method: 'tumblog',
+                args: { song: song, iframeSrc: src }
+              })
+            })
+          }
+        }
+      })
+    }
+    if(dashSongs.length !== 0) {
+      Object.keys(dashSongs).forEach(function(key){
+      // for(var key in dashSongs){
+        if(typeof dashSongs[key] == 'object') {
+          var song = dashSongs[key];
+          var songTitle = song.attributes['data-track'].value;
+          var songArtist = song.attributes['data-artist'].value;
+          var songAlbum = song.attributes['data-album'].value;
+          var permalink_url = song.attributes['data-stream-url'].value.substring(
+                              song.attributes['data-stream-url'].value.indexOf('/audio_file/') + 12,
+                              song.attributes['data-stream-url'].value.indexOf('/tumblr_')
+                            )
+          permalink_url = "http://" + permalink_url.split('/')[0] + ".tumblr.com/post/" + permalink_url.split('/')[1];
+          var songInfo = { title: songTitle, artist: songArtist, album: songAlbum, permalink_url: permalink_url };
+          if(holder.indexOf(permalink_url) < 0) {
+            holder.push(permalink_url);
+            $.ajax({ url: permalink_url }).done(function(result){
+              var iframe = result.substring(result.indexOf('<iframe class="tumblr_audio_player'), result.indexOf('</iframe>') + 9);
+              var iframeSrc = iframe.substring(iframe.indexOf('src="') + 5, iframe.indexOf('" frameborder='));
+              chrome.runtime.sendMessage({
+                action: 'newTumblrSong',
+                method: 'dashboard',
+                args: { song: songInfo, iframeSrc: iframeSrc }
+              })
+            })
+          }
+        }
+      }) /**/
+    }
   }
-  if(dashSongs.length !== 0) {
-    Object.keys(dashSongs).forEach(function(key){
-    // for(var key in dashSongs){
-      if(typeof dashSongs[key] == 'object') {
-        var song = dashSongs[key];
-        var songTitle = song.attributes['data-track'].value;
-        var songArtist = song.attributes['data-artist'].value;
-        var songAlbum = song.attributes['data-album'].value;
-        var permalink_url = song.attributes['data-stream-url'].value.substring(
-                            song.attributes['data-stream-url'].value.indexOf('/audio_file/') + 12,
-                            song.attributes['data-stream-url'].value.indexOf('/tumblr_')
-                          )
-        permalink_url = "http://" + permalink_url.split('/')[0] + ".tumblr.com/post/" + permalink_url.split('/')[1];
-        var songInfo = { title: songTitle, artist: songArtist, album: songAlbum, permalink_url: permalink_url };
-        $.ajax({ url: permalink_url }).done(function(result){
-          var iframe = result.substring(result.indexOf('<iframe class="tumblr_audio_player'), result.indexOf('</iframe>') + 9);
-          var iframeSrc = iframe.substring(iframe.indexOf('src="') + 5, iframe.indexOf('" frameborder='));
-          chrome.runtime.sendMessage({
-            action: 'newTumblrSong',
-            method: 'dashboard',
-            args: { song: songInfo, iframeSrc: iframeSrc }
-          })
-        })
-      }
-    }) /**/
-  }
+  var debounceScrape = _.debounce(scrape, 500);
+  $(window).on('scroll', debounceScrape);
+  modules.on('checkForEmbed', function() {
+    $(window).off('scroll', debounceScrape);
+  })
+  $(window).scroll();
 }
 
 ////
@@ -329,6 +342,7 @@ function scrapeFacebook() {
   modules.on('checkForEmbed', function() {
     $(window).off('scroll', debounceScrape);
   })
+  $(window).scroll();
 }
 
 ////
@@ -340,67 +354,85 @@ function scrapeFacebook() {
 modules.on('youtubeNative', _.debounce(scrapeYoutube, 200))
 
 function scrapeYoutube() {
-  //home page and search page
-  var vids = $('.yt-lockup-title');
-  vids.each(function(){
-    var outerHTML = this.outerHTML;
-    var videoID = outerHTML.split('watch?v=')[1].split('"')[0];
-    var title = outerHTML.split('title="')[1].split('"')[0];
-    $.ajax({
-          url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
-          type: 'GET'
-      })
-      .done(function(result){
-        result = JSON.parse(result);
-        if(result.items[0].snippet.categoryId == '10') { //if music category
-            chrome.runtime.sendMessage({
-              action: 'newYoutubeSong',
-              method: 'general',
-              args: { info : result, iframeSrc: null }
-            })
-        }
-      })
-  })
+  var holder = [];
+  function scrape() {
+    //home page and search page
+    var vids = $('.yt-lockup-title');
+    vids.each(function(){
+      var outerHTML = this.outerHTML;
+      var videoID = outerHTML.split('watch?v=')[1].split('"')[0];
+      var title = outerHTML.split('title="')[1].split('"')[0];
+      if(holder.indexOf(videoID) < 0) {
+        holder.push(videoID)
+        $.ajax({
+              url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
+              type: 'GET'
+          })
+          .done(function(result){
+            result = JSON.parse(result);
+            if(result.items[0].snippet.categoryId == '10') { //if music category
+                chrome.runtime.sendMessage({
+                  action: 'newYoutubeSong',
+                  method: 'general',
+                  args: { info : result, iframeSrc: null }
+                })
+            }
+          })
+      }
+    })
 
-  //watching a single vid
-  var video = $('#watch7-content');
-  video.each(function(){
-    var videoID = this.innerHTML.split('itemprop="videoId" content="')[1].split('">')[0];
-    $.ajax({
-          url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
-          type: 'GET'
-      })
-      .done(function(result){
-        result = JSON.parse(result);
-        if(result.items[0].snippet.categoryId == '10') { //if music category
-            chrome.runtime.sendMessage({
-              action: 'newYoutubeSong',
-              method: 'general',
-              args: { info : result, iframeSrc: null }
-            })
-        }
-      })
-  })
+    //watching a single vid
+    var video = $('#watch7-content');
+    video.each(function(){
+      var videoID = this.innerHTML.split('itemprop="videoId" content="')[1].split('">')[0];
+      if(holder.indexOf(videoID) < 0) {
+        holder.push(videoID)
+        $.ajax({
+              url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
+              type: 'GET'
+          })
+          .done(function(result){
+            result = JSON.parse(result);
+            if(result.items[0].snippet.categoryId == '10') { //if music category
+                chrome.runtime.sendMessage({
+                  action: 'newYoutubeSong',
+                  method: 'general',
+                  args: { info : result, iframeSrc: null }
+                })
+            }
+          })
+      }
+    })
 
-  //recommended vids on a song page
-  var thumbVids = $('.thumb-link');
-  thumbVids.each(function(){
-    var videoID = $(this).attr('href').split("?v=")[1];
-    $.ajax({
-            url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
-            type: 'GET'
-        })
-        .done(function(result){
-          result = JSON.parse(result);
-          if(result.items[0].snippet.categoryId == '10') { //if music category
-              chrome.runtime.sendMessage({
-                action: 'newYoutubeSong',
-                method: 'general',
-                args: { info : result, iframeSrc: null }
-              })
-          }
-        })
+    //recommended vids on a song page
+    var thumbVids = $('.thumb-link');
+    thumbVids.each(function(){
+      var videoID = $(this).attr('href').split("?v=")[1];
+      if(holder.indexOf(videoID) < 0) {
+        holder.push(videoID)
+        $.ajax({
+                url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
+                type: 'GET'
+            })
+            .done(function(result){
+              result = JSON.parse(result);
+              if(result.items[0].snippet.categoryId == '10') { //if music category
+                  chrome.runtime.sendMessage({
+                    action: 'newYoutubeSong',
+                    method: 'general',
+                    args: { info : result, iframeSrc: null }
+                  })
+              }
+            })
+      }
+    })
+  }
+  var debounceScrape = _.debounce(scrape, 500);
+  $(window).on('scroll', debounceScrape);
+  modules.on('checkForEmbed', function() {
+    $(window).off('scroll', debounceScrape);
   })
+  $(window).scroll();
 }
 
 ////
@@ -411,47 +443,64 @@ function scrapeYoutube() {
 modules.on('soundcloudNative', _.debounce(scrapeSoundcloud, 200))
 
 function scrapeSoundcloud() {
- console.log('test?')
-  // search/explore/stream pages: document.getElementsByClassName('streamContext')
-  var searchTracks = $('.sound__coverArt');
-  searchTracks.each(function(){
-    var href = "http://soundcloud.com" + $(this).attr('href');
-    $.ajax({ url : 'http://api.soundcloud.com/resolve.json?url=' + href + '&client_id=7af759eb774be5664395ed9afbd09c46' })
-            .done(function(result){
-                chrome.runtime.sendMessage({
-                  action: 'newSCSong',
-                  method: '',
-                  args: { song : result, iframeSrc: null }
-                })
-            })
-  })
-  // main song on song page: query domain
-  if(searchTracks.length == 0) {
-    var domain = "http://" + document.domain + window.location.pathname;
-    console.log('domain', domain)
-    $.ajax({ url : 'http://api.soundcloud.com/resolve.json?url=' + domain + '&client_id=7af759eb774be5664395ed9afbd09c46' })
-            .done(function(result){
-              console.log('inside result?')
-                chrome.runtime.sendMessage({
-                  action: 'newSCSong',
-                  method: '',
-                  args: { song : result, iframeSrc: null }
-                })
-            })
-    // recommended tracks on song page: document.getElementsByClassName('soundBadge__avatarLink')
-    var recTracks = $('.soundBadge__avatarLink');
-    recTracks.each(function(){
+  var holder = [];
+  function scrape() {
+    // search/explore/stream pages: document.getElementsByClassName('streamContext')
+    var searchTracks = $('.sound__coverArt');
+    searchTracks.each(function(){
       var href = "http://soundcloud.com" + $(this).attr('href');
-      $.ajax({ url : 'http://api.soundcloud.com/resolve.json?url=' + href + '&client_id=7af759eb774be5664395ed9afbd09c46' })
-            .done(function(result){
-                chrome.runtime.sendMessage({
-                  action: 'newSCSong',
-                  method: '',
-                  args: { song : result, iframeSrc: null }
+      if(holder.indexOf(href) < 0) {
+        holder.push(href);
+        $.ajax({ url : 'http://api.soundcloud.com/resolve.json?url=' + href + '&client_id=7af759eb774be5664395ed9afbd09c46' })
+                .done(function(result){
+                    chrome.runtime.sendMessage({
+                      action: 'newSCSong',
+                      method: '',
+                      args: { song : result, iframeSrc: null }
+                    })
                 })
-            })
+      }
     })
+    // main song on song page: query domain
+    if(searchTracks.length == 0) {
+      var domain = "http://" + document.domain + window.location.pathname;
+      console.log('domain', domain)
+      if(holder.indexOf(domain) < 0) {
+        holder.push(domain);
+        $.ajax({ url : 'http://api.soundcloud.com/resolve.json?url=' + domain + '&client_id=7af759eb774be5664395ed9afbd09c46' })
+                .done(function(result){
+                  console.log('inside result?')
+                    chrome.runtime.sendMessage({
+                      action: 'newSCSong',
+                      method: '',
+                      args: { song : result, iframeSrc: null }
+                    })
+                })
+      }
+      // recommended tracks on song page: document.getElementsByClassName('soundBadge__avatarLink')
+      var recTracks = $('.soundBadge__avatarLink');
+      recTracks.each(function(){
+        var href = "http://soundcloud.com" + $(this).attr('href');
+        if(holder.indexOf(href) < 0) {
+          holder.push(href);
+          $.ajax({ url : 'http://api.soundcloud.com/resolve.json?url=' + href + '&client_id=7af759eb774be5664395ed9afbd09c46' })
+                .done(function(result){
+                    chrome.runtime.sendMessage({
+                      action: 'newSCSong',
+                      method: '',
+                      args: { song : result, iframeSrc: null }
+                    })
+                })
+        }
+      })
+    }
   }
+  var debounceScrape = _.debounce(scrape, 500);
+  $(window).on('scroll', debounceScrape);
+  modules.on('checkForEmbed', function() {
+    $(window).off('scroll', debounceScrape);
+  })
+  $(window).scroll();
 }
 
 ////
@@ -528,4 +577,5 @@ function scrapeTwitter() {
   modules.on('checkForEmbed', function() {
     $(window).off('scroll', debounceScrape);
   })
+  $(window).scroll();
 }
