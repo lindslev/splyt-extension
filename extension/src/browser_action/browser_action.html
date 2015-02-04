@@ -10,9 +10,9 @@
   <div ng-controller="HomeCtrl" id="mainPopup">
     <h1>Splyt</h1>
     <ul>
-      <p>Songs on Page</p>
+      <p ng-show="songs.length">Songs on Page</p>
       <li ng-repeat="songObj in songs">
-        <a href="{{songObj.song.permalink_url}}" target="_blank">{{songObj.song.title}}</a>
+        <a href="{{songObj.song.permalink_url}}" target="_blank">{{songObj.song.title}}<span ng-hide="songObj.song.title.length">No title</span></a>
         <button ng-click="addSong(songObj)">Add</button>
       </li>
     </ul>
