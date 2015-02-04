@@ -20,7 +20,8 @@ function scrapeEmbed() {
   var youtubeIDs = ""; //tracks which ids we've sent to the background script already
   var spotifyUsers = ""; //tracks which user playlists we've sent already
 
-  for(var key in iframes) {
+  Object.keys(iframes).forEach(function(key){
+  // for(var key in iframes) {
     var iframe = iframes[key];
     if(iframe.outerHTML) {
         /** soundcloud embeds **/
@@ -137,7 +138,7 @@ function scrapeEmbed() {
         } /**end spotify embeds **/
 
     } /** end if(iframe.outerHTML)**/
-  } /** end key in iframes **/
+  }) /** end key in iframes **/
 } /** end scrapeEmbed() **/
 
 
