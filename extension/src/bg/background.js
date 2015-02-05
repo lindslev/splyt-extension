@@ -1,7 +1,11 @@
 //PUT YOUR IP ADDRESS HERE with http:// in front of it. It's important, at least for DEV environments.
 //When you're in production, make sure that your production url's reflected here.
 var Splyt = new Splyt('192.168.1.121:9000');
-chrome.browserAction.setBadgeText({ text : '0' });
+
+function setBrowserBadgeToZero() {
+  chrome.browserAction.setBadgeText({ text : '0' });
+}
+setBrowserBadgeToZero();
 
 // Splyt is essentially a resource at this point and you can run methods on it like:
 // Splyt.Endpoint().GET(arguments,callback);
@@ -66,6 +70,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 ////////////////////////////////////////////////////////////////////////
 // Whenever you open a new tab or go to a new page from an existing tab, and it finishes loading, send a message to that tab telling the app to initialize.
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
+  setBrowserBadgeToZero();
   if (changeInfo.status && changeInfo.status == 'complete') {
     runChecks(tabId)
   }
@@ -120,6 +125,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 /////////////////////////////////////////////
 // Fires when the active tab in a window changes
 chrome.tabs.onActivated.addListener(function(changeInfo){
+  setBrowserBadgeToZero();
   runChecks(changeInfo.tabId)
   chrome.tabs.query({}, function(tabs){
     tabs.forEach(function(tab){

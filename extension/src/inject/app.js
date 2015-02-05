@@ -458,7 +458,7 @@ function scrapeSoundcloud() {
 ***/
 ////
 
-modules.on('twitterAudio', _.debounce(scrapeTwitter, 500))
+modules.on('twitterAudio', _.debounce(scrapeTwitter, 2000))
 
 function scrapeTwitter() {
   var holder = []; //dont resend msg if we already did for this song
