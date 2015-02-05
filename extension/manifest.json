@@ -17,7 +17,7 @@
   },
   "options_page": "src/options_custom/index.html",
   "browser_action": {
-    "default_icon": "icons/icon19.png",
+    "default_icon": "icons/buds.png",
     "default_title": "Splyt",
     "default_popup": "src/browser_action/browser_action.html"
   },

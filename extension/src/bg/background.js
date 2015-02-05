@@ -1,6 +1,7 @@
 //PUT YOUR IP ADDRESS HERE with http:// in front of it. It's important, at least for DEV environments.
 //When you're in production, make sure that your production url's reflected here.
 var Splyt = new Splyt('192.168.1.121:9000');
+chrome.browserAction.setBadgeBackgroundColor({ color: '#009688' })
 
 function setBrowserBadgeToZero() {
   chrome.browserAction.setBadgeText({ text : '0' });
@@ -17,7 +18,7 @@ setBrowserBadgeToZero();
 
 var currentSongsOnPage = [], currentPlaylistsOnPage = [], currentSpotPlaylistsOnPage = [];
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-    console.log('did we receive a msg from the content?', message)
+    console.log('RECEIVED MESSAGE FROM CONTEXT:', message)
     if(message.action == 'newSCSong') currentSongsOnPage.push(message.args);
     if(message.action == 'newSCPlaylist') currentPlaylistsOnPage.push(message.args);
     if(message.action == 'newYoutubeSong') {
@@ -26,7 +27,6 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
             permalink_url: "https://www.youtube.com/watch?v=" + message.args.info.items[0].id,
             title: message.args.info.items[0].snippet.title
         }
-        console.log('message.args.song', message.args.song, message.args.info);
       }
       currentSongsOnPage.push(message.args)
     }
@@ -74,6 +74,40 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
   if (changeInfo.status && changeInfo.status == 'complete') {
     runChecks(tabId)
   }
+  runSpecialChecks(tab, tabId)
+})
+
+/////////////////////////////////////////////
+// Fires when the active tab in a window changes
+chrome.tabs.onActivated.addListener(function(changeInfo){
+  setBrowserBadgeToZero();
+  runChecks(changeInfo.tabId)
+  chrome.tabs.query({}, function(tabs){
+    tabs.forEach(function(tab){
+      if(tab.id == changeInfo.tabId) {
+        runSpecialChecks(tab, changeInfo.tabId)
+      }
+    })
+  })
+})
+
+///////////////////////////////////////////
+// Run general embed checks on tab change && page load
+function runChecks(tabId) {
+  currentSongsOnPage = [];
+  currentPlaylistsOnPage = [];
+  currentSpotPlaylistsOnPage = [];
+  chrome.tabs.sendMessage(tabId, {
+            action: 'checkForEmbed',
+            err: null,
+            data: null
+        }, function(response) {
+            if (response) console.log(response);
+        });
+}
+///////////////////////////////////////////
+// Run special cases checks on tab change && page load
+function runSpecialChecks(tab, tabId) {
   if(tab.url.match(/tumblr/g)) {
     chrome.tabs.sendMessage(tabId, {
       action: 'tumblrAudio',
@@ -110,8 +144,17 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
       if(response) console.log(response);
     })
   }
+  if(tab.url.match(/soundcloud/g)) {
+    console.log('test...')
+    chrome.tabs.sendMessage(tabId, {
+      action: 'soundcloudNative',
+      err: null,
+      data: null
+    }, function(response){
+      if(response) console.log(response);
+    })
+  }
   if(tab.url.match(/twitter/g)) {
-    console.log('****')
     chrome.tabs.sendMessage(tabId, {
       action: 'twitterAudio',
       err: null,
@@ -120,90 +163,6 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
       if(response) console.log(response);
     })
   }
-})
-
-/////////////////////////////////////////////
-// Fires when the active tab in a window changes
-chrome.tabs.onActivated.addListener(function(changeInfo){
-  setBrowserBadgeToZero();
-  runChecks(changeInfo.tabId)
-  chrome.tabs.query({}, function(tabs){
-    tabs.forEach(function(tab){
-      if(tab.id == changeInfo.tabId) {
-        if(tab.url.match(/tumblr/g)) {
-          chrome.tabs.sendMessage(changeInfo.tabId, {
-            action: 'tumblrAudio',
-            err: null,
-            data: null
-          }, function(response){
-            if(response) console.log(response);
-          })
-        }
-        if(tab.url.match(/reddit/g)) {
-          chrome.tabs.sendMessage(changeInfo.tabId, {
-            action: 'redditAudio',
-            err: null,
-            data: null
-          }, function(response){
-            if(response) console.log(response);
-          })
-        }
-        if(tab.url.match(/facebook/g)) {
-          chrome.tabs.sendMessage(changeInfo.tabId, {
-            action: 'facebookAudio',
-            err: null,
-            data: null
-          }, function(response){
-            if(response) console.log(response);
-          })
-        }
-        if(tab.url.match(/youtube/g)) {
-          chrome.tabs.sendMessage(changeInfo.tabId, {
-            action: 'youtubeNative',
-            err: null,
-            data: null
-          }, function(response){
-            if(response) console.log(response);
-          })
-        }
-        if(tab.url.match(/soundcloud/g)) {
-          console.log('test...')
-          chrome.tabs.sendMessage(changeInfo.tabId, {
-            action: 'soundcloudNative',
-            err: null,
-            data: null
-          }, function(response){
-            if(response) console.log(response);
-          })
-        }
-        if(tab.url.match(/twitter/g)) {
-          console.log('tesssst')
-          chrome.tabs.sendMessage(changeInfo.tabId, {
-            action: 'twitterAudio',
-            err: null,
-            data: null
-          }, function(response){
-            if(response) console.log(response);
-          })
-        }
-      }
-    })
-  })
-})
-
-///////////////////////////////////////////
-// Run checks on tab change && page load
-function runChecks(tabId) {
-  currentSongsOnPage = [];
-  currentPlaylistsOnPage = [];
-  currentSpotPlaylistsOnPage = [];
-  chrome.tabs.sendMessage(tabId, {
-            action: 'checkForEmbed',
-            err: null,
-            data: null
-        }, function(response) {
-            if (response) console.log(response);
-        });
 }
 
 ///////////////////////////////////////////////

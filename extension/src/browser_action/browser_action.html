@@ -10,8 +10,12 @@
   <div ng-controller="HomeCtrl" id="mainPopup">
     <h1>Splyt</h1>
     <ul>
+      <p ng-hide="songs.length">No music on this page!</p>
       <p ng-show="songs.length">Songs on Page</p>
-      <li ng-repeat="songObj in songs">
+      <div id="searchBar" ng-show="songs.length">
+        <input ng-model="searchTerm" placeholder="search here for song on page"></input>
+      </div>
+      <li ng-repeat="songObj in songs | filter:searchTerm">
         <a href="{{songObj.song.permalink_url}}" target="_blank">{{songObj.song.title}}<span ng-hide="songObj.song.title.length">No title</span></a>
         <button ng-click="addSong(songObj)">Add</button>
       </li>
