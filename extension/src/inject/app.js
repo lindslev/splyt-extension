@@ -24,17 +24,39 @@ function unsafe(e) { //unsafe fxn stolen from reddit lulz
 }
 
 function calledYoutubeAPI(result, src) { //called with result and (iframe) src when /api/youtubes is requested
-  result = JSON.parse(result);
-  var catId = result.items[0].snippet.categoryId,
-      desc = result.items[0].snippet.description,
-      title = result.items[0].snippet.title;
-  if(isMusic(catId) || isValidEntertainment(catId, title, desc)) { //if music category or entertainment song
-    chrome.runtime.sendMessage({
-      action: 'newYoutubeSong',
-      method: 'general',
-      args: { info : result, iframeSrc: src }
-    })
-  }
+    result = JSON.parse(result);
+    var catId = result.items[0].snippet.categoryId,
+        desc = result.items[0].snippet.description,
+        title = result.items[0].snippet.title;
+    if(isMusic(catId) || isValidEntertainment(catId, title, desc)) { //if music category or entertainment song
+      chrome.runtime.sendMessage({
+        action: 'newYoutubeSong',
+        method: 'general',
+        args: { info : result, iframeSrc: src }
+      })
+    }
+}
+
+function callSoundcloudTrackAPI(url, src) {
+  $.ajax({url: url})
+    .done(function(song){
+        chrome.runtime.sendMessage({
+          action: 'newSCSong',
+          method: '',
+          args: { song : song, iframeSrc: src }
+        })
+    });
+}
+
+function callSoundcloudPlaylistAPI(url, src) {
+  $.ajax({url: url})
+    .done(function(playlist){
+        chrome.runtime.sendMessage({
+          action: 'newSCPlaylist',
+          method: '',
+          args: { playlist: playlist, iframeSrc: src }
+        })
+    });
 }
 ////////////// END HELPERS ////////////
 
@@ -66,27 +88,13 @@ function scrapeEmbed() {
           if(src.split('tracks/').length == 2) {
             var scTrackId = src.split('tracks/')[1].split(/[\?\&]/)[0];
             var url = "https://api.soundcloud.com/tracks/" + scTrackId + "?client_id=7af759eb774be5664395ed9afbd09c46&format=json";
-            $.ajax({url: url})
-              .done(function(song){
-                  chrome.runtime.sendMessage({
-                    action: 'newSCSong',
-                    method: '',
-                    args: { song : song, iframeSrc: src }
-                  })
-              });
+            callSoundcloudTrackAPI(url, src);
           }
           /** soundcloud playlist embeds **/
           if(src.split('playlists/').length == 2) {
             var scPlaylistId = src.split('playlists/')[1].split(/[\?\&]/)[0];
             var url = "https://api.soundcloud.com/playlists/" + scPlaylistId + "?client_id=7af759eb774be5664395ed9afbd09c46&format=json";
-            $.ajax({url: url})
-              .done(function(playlist){
-                  chrome.runtime.sendMessage({
-                    action: 'newSCPlaylist',
-                    method: '',
-                    args: { playlist: playlist, iframeSrc: src }
-                  })
-              });
+            callSoundcloudPlaylistAPI(url, src);
           }
         } /** end soundcloud embeds **/
         if(iframe.outerHTML.match(/youtube/g) && !domain.match(/youtube/g)) {
@@ -94,13 +102,13 @@ function scrapeEmbed() {
           var videoID = src.split('/embed/')[1].split('?')[0];
           if(youtubeIDs.indexOf(videoID) < 0) { //tests to see if we've checked this iframe yet
             youtubeIDs += videoID;
-            $.ajax({
-                      url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
-                      type: 'GET'
-                  })
-                  .done(function(result){
-                    calledYoutubeAPI(result, src);
-                  })
+            // $.ajax({
+            //           url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
+            //           type: 'GET'
+            //       })
+            //       .done(function(result){
+            //         calledYoutubeAPI(result, src);
+            //       })
           }
         } /** end general youtube embeds **/
         /** for tumblr dashboard embedded youtubes**/
@@ -447,7 +455,6 @@ function scrapeSoundcloud() {
         holder.push(domain);
         $.ajax({ url : 'http://api.soundcloud.com/resolve.json?url=' + domain + '&client_id=7af759eb774be5664395ed9afbd09c46' })
                 .done(function(result){
-                  console.log('inside result?')
                     chrome.runtime.sendMessage({
                       action: 'newSCSong',
                       method: '',
@@ -502,27 +509,13 @@ function scrapeTwitter() {
           if(url.split('tracks/').length == 2) {
             var scTrackId = url.split('tracks/')[1].split(/[\?\&]/)[0];
             var url = "https://api.soundcloud.com/tracks/" + scTrackId + "?client_id=7af759eb774be5664395ed9afbd09c46&format=json";
-            $.ajax({url: url})
-              .done(function(song){
-                  chrome.runtime.sendMessage({
-                    action: 'newSCSong',
-                    method: '',
-                    args: { song : song, iframeSrc: url }
-                  })
-              });
+            callSoundcloudTrackAPI(url, null)
           }
           /** soundcloud playlist embeds **/
           if(url.split('playlists/').length == 2) {
             var scPlaylistId = url.split('playlists/')[1].split(/[\?\&]/)[0];
             var url = "https://api.soundcloud.com/playlists/" + scPlaylistId + "?client_id=7af759eb774be5664395ed9afbd09c46&format=json";
-            $.ajax({url: url})
-              .done(function(playlist){
-                  chrome.runtime.sendMessage({
-                    action: 'newSCPlaylist',
-                    method: '',
-                    args: { playlist: playlist, iframeSrc: url }
-                  })
-              });
+            callSoundcloudPlaylistAPI(url, null);
           }
         }
       }
