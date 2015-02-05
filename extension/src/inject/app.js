@@ -23,7 +23,12 @@ function unsafe(e) { //unsafe fxn stolen from reddit lulz
   return typeof e == "string" && (e = e.replace(/&quot;/g, '"').replace(/&gt;/g, ">").replace(/&lt;/g, "<").replace(/&amp;/g, "&")), e || ""
 }
 
-function calledYoutubeAPI(result, src) { //called with result and (iframe) src when /api/youtubes is requested
+function callYoutubeAPI(videoID, src) {
+  $.ajax({
+      url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
+      type: 'GET'
+  })
+  .done(function(result){
     result = JSON.parse(result);
     var catId = result.items[0].snippet.categoryId,
         desc = result.items[0].snippet.description,
@@ -35,6 +40,7 @@ function calledYoutubeAPI(result, src) { //called with result and (iframe) src w
         args: { info : result, iframeSrc: src }
       })
     }
+  })
 }
 
 function callSoundcloudTrackAPI(url, src) {
@@ -102,13 +108,7 @@ function scrapeEmbed() {
           var videoID = src.split('/embed/')[1].split('?')[0];
           if(youtubeIDs.indexOf(videoID) < 0) { //tests to see if we've checked this iframe yet
             youtubeIDs += videoID;
-            // $.ajax({
-            //           url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
-            //           type: 'GET'
-            //       })
-            //       .done(function(result){
-            //         calledYoutubeAPI(result, src);
-            //       })
+            callYoutubeAPI(videoID, src);
           }
         } /** end general youtube embeds **/
         /** for tumblr dashboard embedded youtubes**/
@@ -122,13 +122,7 @@ function scrapeEmbed() {
                 var videoID = src.split('/embed/')[1].split('?')[0];
                 if(youtubeIDs.indexOf(videoID) < 0) { //tests to see if we've checked this iframe yet
                   youtubeIDs += videoID;
-                  $.ajax({
-                            url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
-                            type: 'GET'
-                        })
-                        .done(function(result){
-                          calledYoutubeAPI(result, src);
-                        })
+                  callYoutubeAPI(videoID, src);
                 }
               }
             })
@@ -270,13 +264,7 @@ function scrapeReddit() {
         } else {
           var videoID = href.substring(href.indexOf('?v=') + 3, href.length);
         }
-        $.ajax({
-            url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
-            type: 'GET'
-        })
-        .done(function(result){
-          calledYoutubeAPI(result, src);
-        })
+        callYoutubeAPI(videoID, src);
       }
       if(href.match(/soundcloud/g)) {
         chrome.runtime.sendMessage({
@@ -325,13 +313,7 @@ function scrapeFacebook() {
         videoID = href.split('watch?v=')[1].split('&')[0];
         if(holder.indexOf(videoID) < 0) {
           holder.push(videoID);
-          $.ajax({
-              url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
-              type: 'GET'
-          })
-          .done(function(result){
-            calledYoutubeAPI(result, null);
-          })
+          callYoutubeAPI(videoID, null);
         }
       }
     })
@@ -363,13 +345,7 @@ function scrapeYoutube() {
       var title = outerHTML.split('title="')[1].split('"')[0];
       if(holder.indexOf(videoID) < 0) {
         holder.push(videoID)
-        $.ajax({
-              url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
-              type: 'GET'
-          })
-          .done(function(result){
-            calledYoutubeAPI(result, null);
-          })
+        callYoutubeAPI(videoID, null);
       }
     })
 
@@ -379,13 +355,7 @@ function scrapeYoutube() {
       var videoID = this.innerHTML.split('itemprop="videoId" content="')[1].split('">')[0];
       if(holder.indexOf(videoID) < 0) {
         holder.push(videoID)
-        $.ajax({
-              url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
-              type: 'GET'
-          })
-          .done(function(result){
-            calledYoutubeAPI(result, null);
-          })
+        callYoutubeAPI(videoID, null);
       }
     })
 
@@ -395,13 +365,7 @@ function scrapeYoutube() {
       var videoID = $(this).attr('href').split("?v=")[1];
       if(holder.indexOf(videoID) < 0) {
         holder.push(videoID)
-        $.ajax({
-                url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
-                type: 'GET'
-            })
-            .done(function(result){
-              calledYoutubeAPI(result, null);
-            })
+        callYoutubeAPI(videoID, null);
       }
     })
   }
@@ -523,13 +487,7 @@ function scrapeTwitter() {
         if(holder.indexOf(url) < 0) {
           holder.push(url);
           var videoID = url.split('/embed/')[1];
-          $.ajax({
-              url: 'http://192.168.1.121:9000/api/youtubes/' + videoID,
-              type: 'GET'
-          })
-          .done(function(result){
-            calledYoutubeAPI(result, null);
-          })
+          callYoutubeAPI(videoID, null);
         }
       }
     })
