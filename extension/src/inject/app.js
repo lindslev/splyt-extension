@@ -30,15 +30,17 @@ function callYoutubeAPI(videoID, src) {
   })
   .done(function(result){
     result = JSON.parse(result);
-    var catId = result.items[0].snippet.categoryId,
-        desc = result.items[0].snippet.description,
-        title = result.items[0].snippet.title;
-    if(isMusic(catId) || isValidEntertainment(catId, title, desc)) { //if music category or entertainment song
-      chrome.runtime.sendMessage({
-        action: 'newYoutubeSong',
-        method: 'general',
-        args: { info : result, iframeSrc: src }
-      })
+    if(result.items[0]) {
+      var catId = result.items[0].snippet.categoryId,
+          desc = result.items[0].snippet.description,
+          title = result.items[0].snippet.title;
+      if(isMusic(catId) || isValidEntertainment(catId, title, desc)) { //if music category or entertainment song
+        chrome.runtime.sendMessage({
+          action: 'newYoutubeSong',
+          method: 'general',
+          args: { info : result, iframeSrc: src }
+        })
+      }
     }
   })
 }
@@ -63,6 +65,16 @@ function callSoundcloudPlaylistAPI(url, src) {
           args: { playlist: playlist, iframeSrc: src }
         })
     });
+}
+
+function registerScrollEvents(scrapeFn) {
+  var debounceScrape = _.debounce(scrapeFn, 500);
+  var $window = $(window);
+  $window.on('scroll', debounceScrape);
+  modules.on('checkForEmbed', function() {
+    $window.off('scroll', debounceScrape);
+  })
+  $window.scroll();
 }
 ////////////// END HELPERS ////////////
 
@@ -231,12 +243,7 @@ function scrapeTumblr() {
       }) /**/
     }
   }
-  var debounceScrape = _.debounce(scrape, 500);
-  $(window).on('scroll', debounceScrape);
-  modules.on('checkForEmbed', function() {
-    $(window).off('scroll', debounceScrape);
-  })
-  $(window).scroll();
+  registerScrollEvents(scrape);
 }
 
 ////
@@ -318,12 +325,7 @@ function scrapeFacebook() {
       }
     })
   }
-  var debounceScrape = _.debounce(scrape, 500);
-  $(window).on('scroll', debounceScrape);
-  modules.on('checkForEmbed', function() {
-    $(window).off('scroll', debounceScrape);
-  })
-  $(window).scroll();
+  registerScrollEvents(scrape);
 }
 
 ////
@@ -341,11 +343,14 @@ function scrapeYoutube() {
     var vids = $('.yt-lockup-title');
     vids.each(function(){
       var outerHTML = this.outerHTML;
-      var videoID = outerHTML.split('watch?v=')[1].split('"')[0];
-      var title = outerHTML.split('title="')[1].split('"')[0];
-      if(holder.indexOf(videoID) < 0) {
-        holder.push(videoID)
-        callYoutubeAPI(videoID, null);
+      console.log('whyyyy', outerHTML);
+      if(outerHTML.split('watch?v=').length > 1) {
+        var videoID = outerHTML.split('watch?v=')[1].split('"')[0];
+        var title = outerHTML.split('title="')[1].split('"')[0];
+        if(holder.indexOf(videoID) < 0) {
+          holder.push(videoID)
+          callYoutubeAPI(videoID, null);
+        }
       }
     })
 
@@ -369,12 +374,7 @@ function scrapeYoutube() {
       }
     })
   }
-  var debounceScrape = _.debounce(scrape, 500);
-  $(window).on('scroll', debounceScrape);
-  modules.on('checkForEmbed', function() {
-    $(window).off('scroll', debounceScrape);
-  })
-  $(window).scroll();
+  registerScrollEvents(scrape);
 }
 
 ////
@@ -444,12 +444,7 @@ function scrapeSoundcloud() {
       })
     }
   }
-  var debounceScrape = _.debounce(scrape, 500);
-  $(window).on('scroll', debounceScrape);
-  modules.on('checkForEmbed', function() {
-    $(window).off('scroll', debounceScrape);
-  })
-  $(window).scroll();
+  registerScrollEvents(scrape);
 }
 
 ////
@@ -492,10 +487,5 @@ function scrapeTwitter() {
       }
     })
   }
-  var debounceScrape = _.debounce(scrape, 500);
-  $(window).on('scroll', debounceScrape);
-  modules.on('checkForEmbed', function() {
-    $(window).off('scroll', debounceScrape);
-  })
-  $(window).scroll();
+  registerScrollEvents(scrape);
 }

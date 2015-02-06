@@ -18,8 +18,12 @@ setBrowserBadgeToZero();
 
 var currentSongsOnPage = [], currentPlaylistsOnPage = [], currentSpotPlaylistsOnPage = [];
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-    console.log('RECEIVED MESSAGE FROM CONTEXT:', message)
-    if(message.action == 'newSCSong') currentSongsOnPage.push(message.args);
+    console.log('RECEIVED MESSAGE FROM CONTENT:', message)
+    var obj = { action: message.action, args: message.args }
+    // message.args.action = message.action;
+    // message.args.args = message.args;
+    console.log('obj before pushing', obj)
+    if(message.action == 'newSCSong') currentSongsOnPage.push(obj);
     if(message.action == 'newSCPlaylist') currentPlaylistsOnPage.push(message.args);
     if(message.action == 'newYoutubeSong') {
       if(message.method == 'general') { //general embeds, dont need to do this for reddit embeds
@@ -188,12 +192,21 @@ socket.on('thing:save', function(doc) {
 
 //////////////////////////////////////////////
 // This block listens to messages sent from your "externally connectable" website. Line 27 - manifest json. Right now it just logs and calls back.
+var isLoggedIn = false, identity;
 chrome.runtime.onMessageExternal.addListener(
     function(request, sender, sendResponse) {
-        console.log(arguments);
+        console.log('WE ARE INSIDE OF MESSAGE EXTERNAL', arguments);
+        if(arguments[0].action === 'LOGIN' && arguments[0].user) {
+          isLoggedIn = true;
+          identity = arguments[0].user;
+          token = arguments[0].token;
+        }
+        if(arguments[0].action == 'LOGOUT') {
+          isLoggedIn = false;
+          identity = null;
+        }
         sendResponse(200);
     });
-
 
 //---------------------------------------------------
 
@@ -207,4 +220,16 @@ function currentPlaylists() {
 
 function currentSpotPlaylists() {
   return currentSpotPlaylistsOnPage;
+}
+
+function isLoggedIntoApp() {
+  return isLoggedIn;
+}
+
+function currentUser() {
+  return identity;
+}
+
+function getToken() {
+  return token;
 }
