@@ -24,34 +24,34 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     // message.args.args = message.args;
     console.log('obj before pushing', obj)
     if(message.action == 'newSCSong') currentSongsOnPage.push(obj);
-    if(message.action == 'newSCPlaylist') currentPlaylistsOnPage.push(message.args);
+    if(message.action == 'newSCPlaylist') currentPlaylistsOnPage.push(obj);
     if(message.action == 'newYoutubeSong') {
       if(message.method == 'general') { //general embeds, dont need to do this for reddit embeds
-        message.args.song = {
+        obj.args.song = {
             permalink_url: "https://www.youtube.com/watch?v=" + message.args.info.items[0].id,
             title: message.args.info.items[0].snippet.title
         }
       }
-      currentSongsOnPage.push(message.args)
+      currentSongsOnPage.push(obj)
     }
     if(message.action == 'newSpotifySong') {
-      message.args.song = {
+      obj.args.song = {
         permalink_url: message.args.info.external_urls.spotify,
         title: message.args.info.name
       }
-      currentSongsOnPage.push(message.args);
+      currentSongsOnPage.push(obj);
     }
     if(message.action == 'newSpotifyPlaylist') {
-      currentSpotPlaylistsOnPage.push(message.args);
+      currentSpotPlaylistsOnPage.push(obj);
     }
     if(message.action == 'newTumblrSong') {
       if(message.method == 'tumblog') {
-        message.args.song['permalink_url'] = message.args.iframeSrc.substring(
+        obj.args.song['permalink_url'] = message.args.iframeSrc.substring(
                                                 message.args.iframeSrc.indexOf('/post/' + 6),
                                                 message.args.iframeSrc.indexOf('/audio_player_iframe/')
                                             );
       }
-      currentSongsOnPage.push(message.args);
+      currentSongsOnPage.push(obj);
     }
     if(message.action == 'soundcloudLoading') { //get tabs for domain fxn
       chrome.tabs.query({}, function(tabs){
@@ -192,7 +192,7 @@ socket.on('thing:save', function(doc) {
 
 //////////////////////////////////////////////
 // This block listens to messages sent from your "externally connectable" website. Line 27 - manifest json. Right now it just logs and calls back.
-var isLoggedIn = false, identity;
+var isLoggedIn = false, identity, token;
 chrome.runtime.onMessageExternal.addListener(
     function(request, sender, sendResponse) {
         console.log('WE ARE INSIDE OF MESSAGE EXTERNAL', arguments);

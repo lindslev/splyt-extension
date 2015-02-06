@@ -5,16 +5,14 @@
 console.log('browser action loaded');
 var currentPage = chrome.extension.getBackgroundPage();
 
-angular.module('splytApp', ['ngCookies'])
-  .controller('HomeCtrl', function ($http, $scope, $timeout, $cookies) {
+angular.module('splytApp', [])
+  .controller('HomeCtrl', function ($http, $scope, $timeout) {
     $scope.songs = currentPage.currentSongs();
     $scope.playlists = currentPage.currentPlaylists();
     $scope.spotPlaylists = currentPage.currentSpotPlaylists();
     $scope.isLoggedIn = currentPage.isLoggedIntoApp();
     $scope.currentUser = currentPage.currentUser();
     var token = currentPage.getToken();
-
-    console.log('cookies', $cookies)
 
     $scope.addSong = function(song) {
       console.log('adding song', song);

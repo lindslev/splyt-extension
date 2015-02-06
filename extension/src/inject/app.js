@@ -401,7 +401,7 @@ function scrapeSoundcloud() {
       var href = "http://soundcloud.com" + $(this).attr('href');
       if(holder.indexOf(href) < 0) {
         holder.push(href);
-        $.ajax({ url : 'http://api.soundcloud.com/resolve.json?url=' + href + '&client_id=7af759eb774be5664395ed9afbd09c46' })
+        $.ajax({ url : 'https://api.soundcloud.com/resolve.json?url=' + href + '&client_id=7af759eb774be5664395ed9afbd09c46' })
                 .done(function(result){
                     chrome.runtime.sendMessage({
                       action: 'newSCSong',
@@ -417,7 +417,7 @@ function scrapeSoundcloud() {
       console.log('domain', domain)
       if(holder.indexOf(domain) < 0) {
         holder.push(domain);
-        $.ajax({ url : 'http://api.soundcloud.com/resolve.json?url=' + domain + '&client_id=7af759eb774be5664395ed9afbd09c46' })
+        $.ajax({ url : 'https://api.soundcloud.com/resolve.json?url=' + domain + '&client_id=7af759eb774be5664395ed9afbd09c46' })
                 .done(function(result){
                     chrome.runtime.sendMessage({
                       action: 'newSCSong',
@@ -432,7 +432,7 @@ function scrapeSoundcloud() {
         var href = "http://soundcloud.com" + $(this).attr('href');
         if(holder.indexOf(href) < 0) {
           holder.push(href);
-          $.ajax({ url : 'http://api.soundcloud.com/resolve.json?url=' + href + '&client_id=7af759eb774be5664395ed9afbd09c46' })
+          $.ajax({ url : 'https://api.soundcloud.com/resolve.json?url=' + href + '&client_id=7af759eb774be5664395ed9afbd09c46' })
                 .done(function(result){
                     chrome.runtime.sendMessage({
                       action: 'newSCSong',
