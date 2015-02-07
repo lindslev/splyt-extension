@@ -20,9 +20,6 @@ var currentSongsOnPage = [], currentPlaylistsOnPage = [], currentSpotPlaylistsOn
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     console.log('RECEIVED MESSAGE FROM CONTENT:', message)
     var obj = { action: message.action, args: message.args }
-    // message.args.action = message.action;
-    // message.args.args = message.args;
-    console.log('obj before pushing', obj)
     if(message.action == 'newSCSong') currentSongsOnPage.push(obj);
     if(message.action == 'newSCPlaylist') currentPlaylistsOnPage.push(obj);
     if(message.action == 'newYoutubeSong') {
@@ -171,24 +168,24 @@ function runSpecialChecks(tab, tabId) {
 
 ///////////////////////////////////////////////
 //Sockets
-var socket = io.connect('http://192.168.1.15:9000', {
-    //Wherever your sockets are configured to emit from. If using fullstack-generator, this will work out of the box.
-    path: '/socket.io-client',
-    transports: ['websocket'],
-    'force new connection': true
-});
+// var socket = io.connect('http://192.168.1.15:9000', {
+//     //Wherever your sockets are configured to emit from. If using fullstack-generator, this will work out of the box.
+//     path: '/socket.io-client',
+//     transports: ['websocket'],
+//     'force new connection': true
+// });
 
-socket.on('thing:save', function(doc) {
-    console.log('received from socket', doc);
-    //whenever a thing is saved in your database, if you generated with angular-fullstack, it'll emit a socket that makes that thing available instantly.
+// socket.on('thing:save', function(doc) {
+//     console.log('received from socket', doc);
+//     //whenever a thing is saved in your database, if you generated with angular-fullstack, it'll emit a socket that makes that thing available instantly.
 
-    //Since this is the background page, your content scripts or your popup won't be aware of it. That's why we're going to send a message. If you want to make this data available in a specific tab, you'll need to query all the tabs and find a specific id.
-    return chrome.tabs.sendMessage("NUMERICAL ID OF TAB YOU WANT TO RECEIVE", {
-        action: 'ENDPOINT_NAME:METHOD',
-        err: null,
-        data: doc
-    })
-});
+//     //Since this is the background page, your content scripts or your popup won't be aware of it. That's why we're going to send a message. If you want to make this data available in a specific tab, you'll need to query all the tabs and find a specific id.
+//     return chrome.tabs.sendMessage("NUMERICAL ID OF TAB YOU WANT TO RECEIVE", {
+//         action: 'ENDPOINT_NAME:METHOD',
+//         err: null,
+//         data: doc
+//     })
+// });
 
 //////////////////////////////////////////////
 // This block listens to messages sent from your "externally connectable" website. Line 27 - manifest json. Right now it just logs and calls back.
@@ -208,6 +205,8 @@ chrome.runtime.onMessageExternal.addListener(
         sendResponse(200);
     });
 
+//---------------------------------------------------
+//---------   FOR COMM. WITH BROWSER ACTION  --------
 //---------------------------------------------------
 
 function currentSongs() {

@@ -46,8 +46,8 @@
         "*://*/*"
       ],
       "css": [
-        "src/inject/reset.css",
-        "src/inject/inject.css"
+        "src/inject/css/reset.css",
+        "src/inject/css/inject.css"
       ]
     },
     {
@@ -57,8 +57,16 @@
       "js": [
         "js/jquery/jquery.js",
         "js/lodash.js",
-        "src/inject/hooks.js",
-        "src/inject/app.js"
+        "src/inject/js/hooks.js",
+        "src/inject/js/helpers.js",
+        "src/inject/js/platforms/twitter.js",
+        "src/inject/js/platforms/youtube.js",
+        "src/inject/js/platforms/soundcloud.js",
+        "src/inject/js/platforms/reddit.js",
+        "src/inject/js/platforms/facebook.js",
+        "src/inject/js/platforms/tumblr.js",
+        "src/inject/js/embeds.js",
+        "src/inject/js/app.js"
       ]
     }
   ]
