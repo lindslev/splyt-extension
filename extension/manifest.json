@@ -3,12 +3,12 @@
   "version": "0.0.1",
   "manifest_version": 2,
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
-  "description": "This extension was created with the awesome extensionizr.com",
-  "homepage_url": "http://extensionizr.com",
+  "description": "the best experience for discovering, sharing and listening to web-hosted music in the browser",
+  "homepage_url": "http://splyt.com",
   "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "icons/buds.png",
+    "48": "icons/buds.png",
+    "128": "icons/buds.png"
   },
   "default_locale": "en",
   "background": {
@@ -29,7 +29,6 @@
     "contentSettings",
     "contextMenus",
     "cookies",
-    "fileBrowserHandler",
     "history",
     "idle",
     "notifications",
