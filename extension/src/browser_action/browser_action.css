@@ -32,8 +32,11 @@ ul {
 button {
   font-size: 10px;
 }
-i {
+i, .playlistSelection {
   cursor: pointer;
+}
+.playlistSelection {
+  background: black;
 }
 input {
     text-align: center;
