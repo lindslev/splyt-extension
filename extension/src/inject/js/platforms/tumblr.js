@@ -42,15 +42,15 @@ function scrapeTumblr() {
           var songInfo = { title: songTitle, artist: songArtist, album: songAlbum, permalink_url: permalink_url };
           if(holder.indexOf(permalink_url) < 0) {
             holder.push(permalink_url);
-            $.ajax({ url: permalink_url }).done(function(result){
-              var iframe = result.substring(result.indexOf('<iframe class="tumblr_audio_player'), result.indexOf('</iframe>') + 9);
-              var iframeSrc = iframe.substring(iframe.indexOf('src="') + 5, iframe.indexOf('" frameborder='));
+            // $.ajax({ url: permalink_url }).done(function(result){
+              // var iframe = result.substring(result.indexOf('<iframe class="tumblr_audio_player'), result.indexOf('</iframe>') + 9);
+              // var iframeSrc = iframe.substring(iframe.indexOf('src="') + 5, iframe.indexOf('" frameborder='));
               chrome.runtime.sendMessage({
                 action: 'newTumblrSong',
                 method: 'dashboard',
-                args: { song: songInfo, iframeSrc: iframeSrc }
+                args: { song: songInfo, iframeSrc: null }
               })
-            })
+            // })
           }
         }
       }) /**/

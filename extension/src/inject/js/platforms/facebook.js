@@ -11,7 +11,7 @@ function scrapeFacebook() {
         console.log('inside embed SC', songTitle, holder)
         if(holder.indexOf(songTitle) < 0) {
           holder.push(songTitle);
-          $.ajax({ url : 'http://api.soundcloud.com/resolve.json?url=' + href + '&client_id=7af759eb774be5664395ed9afbd09c46' })
+          $.ajax({ url : 'https://api.soundcloud.com/resolve.json?url=' + href + '&client_id=7af759eb774be5664395ed9afbd09c46' })
             .done(function(result){
                 chrome.runtime.sendMessage({
                   action: 'newSCSong',
