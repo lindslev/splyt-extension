@@ -9,6 +9,14 @@ function scrapeTumblr() {
         if(typeof songs[key] == 'object') {
           var song = songs[key];
           var src = decodeURIComponent(song.src);
+          var user = src.split('http://')[1].split('.tumblr')[0];
+          var postId = src.split('/post/')[1].split('/audio_player_iframe')[0];
+          if(src.split('tumblr_')[1].split('?audio_file')[0].length > 1) { // BUGGY
+            var tumblrSecret = src.split('tumblr_')[1].split('?audio_file')[0];
+          } else {
+            var tumblrSecret = src.split('tumblr_')[1].split('&')[0];
+          }
+          var audioSrc = 'https://www.tumblr.com/audio_file/' + user + '/' + postId + '/tumblr_' + tumblrSecret + '?play_key=e6ba8f023e92bbb5aaf06052cd0c6551&tumblelog=' + user + '&post_id=' + postId;
           if(holder.indexOf(src) < 0) {
             holder.push(src);
             $.ajax({ url: song.src }).done(function(result){
@@ -19,7 +27,7 @@ function scrapeTumblr() {
               chrome.runtime.sendMessage({
                 action: 'newTumblrSong',
                 method: 'tumblog',
-                args: { song: song, iframeSrc: src }
+                args: { song: song, iframeSrc: audioSrc }
               })
             })
           }
@@ -31,6 +39,7 @@ function scrapeTumblr() {
       // for(var key in dashSongs){
         if(typeof dashSongs[key] == 'object') {
           var song = dashSongs[key];
+          var tumblrSecret = $('.album_art_container > img').attr('src').split('tumblr_')[1].split('o1')[0];
           var songTitle = song.attributes['data-track'].value;
           var songArtist = song.attributes['data-artist'].value;
           var songAlbum = song.attributes['data-album'].value;
@@ -38,7 +47,10 @@ function scrapeTumblr() {
                               song.attributes['data-stream-url'].value.indexOf('/audio_file/') + 12,
                               song.attributes['data-stream-url'].value.indexOf('/tumblr_')
                             )
-          permalink_url = "http://" + permalink_url.split('/')[0] + ".tumblr.com/post/" + permalink_url.split('/')[1];
+          var user = permalink_url.split('/')[0];
+          var postId = permalink_url.split('/')[1];
+          permalink_url = "http://" + user + ".tumblr.com/post/" + postId;
+          var audioSrc = 'https://www.tumblr.com/audio_file/' + user + '/' + postId + '/tumblr_' + tumblrSecret + '?play_key=e6ba8f023e92bbb5aaf06052cd0c6551&tumblelog=' + user + '&post_id=' + postId;
           var songInfo = { title: songTitle, artist: songArtist, album: songAlbum, permalink_url: permalink_url };
           if(holder.indexOf(permalink_url) < 0) {
             holder.push(permalink_url);
@@ -48,7 +60,7 @@ function scrapeTumblr() {
               chrome.runtime.sendMessage({
                 action: 'newTumblrSong',
                 method: 'dashboard',
-                args: { song: songInfo, iframeSrc: null }
+                args: { song: songInfo, iframeSrc: audioSrc }
               })
             // })
           }
