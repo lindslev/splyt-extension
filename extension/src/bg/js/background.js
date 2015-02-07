@@ -1,6 +1,6 @@
 //PUT YOUR IP ADDRESS HERE with http:// in front of it. It's important, at least for DEV environments.
 //When you're in production, make sure that your production url's reflected here.
-var Splyt = new Splyt('192.168.1.121:9000');
+var Splyt = new Splyt('192.168.1.148:9000');
 chrome.browserAction.setBadgeBackgroundColor({ color: '#009688' })
 
 function setBrowserBadgeToZero() {
