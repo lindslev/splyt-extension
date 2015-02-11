@@ -17,7 +17,7 @@ function isMusic(id) { //checks youtube music category
 
 function callYoutubeAPI(videoID, src) {
   $.ajax({
-      url: 'https://7b743589.ngrok.com/api/youtubes/' + videoID,
+      url: 'https://4a5864dc.ngrok.com/api/youtubes/' + videoID,
       type: 'GET'
   })
   .done(function(result){

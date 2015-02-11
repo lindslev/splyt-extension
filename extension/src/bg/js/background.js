@@ -42,12 +42,6 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
       currentSpotPlaylistsOnPage.push(obj);
     }
     if(message.action == 'newTumblrSong') {
-      if(message.method == 'tumblog') {
-        obj.args.song['permalink_url'] = message.args.iframeSrc.substring(
-                                                message.args.iframeSrc.indexOf('/post/' + 6),
-                                                message.args.iframeSrc.indexOf('/audio_player_iframe/')
-                                            );
-      }
       currentSongsOnPage.push(obj);
     }
     if(message.action == 'soundcloudLoading') { //get tabs for domain fxn
@@ -73,7 +67,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
   setBrowserBadgeToZero();
   if (changeInfo.status && changeInfo.status == 'complete') {
-    runChecks(tabId)
+    runChecks(tabId) //DONT RUN CHECKS ON OUR DOMAIN **!!!**!*!*!*!*!
   }
   runSpecialChecks(tab, tabId)
 })

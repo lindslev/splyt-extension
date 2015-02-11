@@ -40,7 +40,7 @@ angular.module('splytApp', [])
     }
 
     $scope.login = function() {
-      window.open('http://' + ip + '/auth/google', '_blank');
+      window.open('http://' + ip + ':9000/auth/google', '_blank');
     }
 
     $scope.addToPlaylist = function(playlist) {
