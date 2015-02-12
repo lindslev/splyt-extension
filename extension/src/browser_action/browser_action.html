@@ -20,6 +20,9 @@
           <div id="userPlaylists" ng-show="clickedAddSong">
             <p class="playlistSelection" ng-repeat="list in userPlaylists" ng-click="addToPlaylist(list)">Add {{selectedSong.args.song.title}} to {{list.title}}</p>
           </div>
+          <div id="userPlaylists" ng-show="clickedAddSpotify">
+            <p class="playlistSelection" ng-click="addToSpotify()">Add {{selectedSong.args.song.title}} to {{userSpotify.title}}</p>
+          </div>
           <div id="searchBar" ng-show="songs.length">
             <input ng-model="searchTerm" placeholder="find songs here"></input>
           </div>
