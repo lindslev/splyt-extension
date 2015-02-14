@@ -33,13 +33,13 @@ angular.module('splytApp', [])
     }
 
     $scope.addSong = function(song) {
-      console.log('adding song', song);
+      $scope.clickedAddSpotify = $scope.clickedAddSong = false;
       $scope.selectedSong = song;
       song.action == 'newSpotifySong' ? $scope.clickedAddSpotify = true : $scope.clickedAddSong = true;
     }
 
     $scope.addPlaylist = function(playlist) {
-      console.log('adding playlist', playlist);
+      alert('Ability to add playlists coming soon!');
     }
 
     $scope.login = function() {
