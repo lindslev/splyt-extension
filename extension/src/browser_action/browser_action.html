@@ -9,12 +9,14 @@
 <script src="/js/angular/angular.js"></script>
 <script src="/js/angular-cookies.js"></script>
 <script src="browser_action.js"></script>
+<script src="/js/jquery/jquery.js"></script>
 <body ng-app="splytApp">
   <div ng-controller="HomeCtrl">
     <div class="container">
       <div class="row">
         <h1 class="animated lightSpeedIn">Splyt</h1>
         <button ng-hide="isLoggedIn" class="btn btn-google-plus" ng-click="login()">Login with Google</button>
+        <div id="playerController" ng-show="isLoggedIn" ng-hide="musicPlayingInApp == 'NOTHING'"><span ng-click="controlPlayer()" class="glyphicon" ng-class="{ 'glyphicon-pause' : musicPlayingInApp, 'glyphicon-play' : !musicPlayingInApp }"></span></div>
         <div ng-show="isLoggedIn" id="mainStuff">
           <p ng-hide="songs.length">No music on this page!</p>
           <div id="userPlaylists" ng-show="clickedAddSong">

@@ -14,6 +14,7 @@ angular.module('splytApp', [])
     $scope.currentUser = currentPage.currentUser();
     var token = currentPage.getToken();
     $scope.clickedAddSong = false, $scope.clickedAddSpotify = false;
+    $scope.musicPlayingInApp = currentPage.currentPlayerAction();
 
     if($scope.currentUser) {
       var req = {
@@ -85,5 +86,20 @@ angular.module('splytApp', [])
         .error(function(err){
           console.log('err', err);
         })
+    }
+
+    $scope.controlPlayer = function() {
+      var action;
+      if($scope.musicPlayingInApp !== 'NOTHING') {
+        if($scope.musicPlayingInApp) {
+          $scope.musicPlayingInApp = false;
+          action = 'play';
+        } else {
+          $scope.musicPlayingInApp = true;
+          action = 'pause';
+        }
+      }
+      $http.get('http://' + ip + ':9000/api/youtubes/player/' + action)
+          .success(function(){ })
     }
   });

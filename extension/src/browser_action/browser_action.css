@@ -12,9 +12,6 @@ a, a:hover {
   text-decoration: none;
   color: white;
 }
-a:hover {
-
-}
 .subtitle {
   background: black;
   color: white;
@@ -65,4 +62,8 @@ input {
 }
 .even, .even:hover {
   color: black;
+}
+#playerController span {
+  font-size: 30px;
+  cursor: pointer;
 }
