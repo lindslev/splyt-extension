@@ -20,11 +20,12 @@ function scrapeEmbed() {
             callSoundcloudTrackAPI(url, src);
           }
           /** soundcloud playlist embeds **/
-          if(src.split('playlists/').length == 2) {
-            var scPlaylistId = src.split('playlists/')[1].split(/[\?\&]/)[0];
-            var url = "https://api.soundcloud.com/playlists/" + scPlaylistId + "?client_id=7af759eb774be5664395ed9afbd09c46&format=json";
-            callSoundcloudPlaylistAPI(url, src);
-          }
+          //leaving this out until the web app is ready to accomodate playlists
+          // if(src.split('playlists/').length == 2) {
+          //   var scPlaylistId = src.split('playlists/')[1].split(/[\?\&]/)[0];
+          //   var url = "https://api.soundcloud.com/playlists/" + scPlaylistId + "?client_id=7af759eb774be5664395ed9afbd09c46&format=json";
+          //   callSoundcloudPlaylistAPI(url, src);
+          // }
         } /** end soundcloud embeds **/
         if(iframe.outerHTML.match(/youtube/g) && !domain.match(/youtube/g)) {
           var src = decodeURIComponent(iframe.src)
@@ -67,20 +68,22 @@ function scrapeEmbed() {
                 })
               })
           } /** end spotify track embeds **/
-          if(src2.split(':playlist:').length > 1) {
-            var spotPLId = src2.split(':playlist:')[1].split('&')[0];
-            var spotPLUserId = src2.split(':playlist:')[0].split(':user:')[1];
-            if(spotifyUsers.indexOf(spotPLUserId) < 0) {
-              spotifyUsers += spotPLUserId;
-              var permalink_url = "http://open.spotify.com/user/" + spotPLUserId + "/playlist/" + spotPLId;
-              var playlist = { permalink_url: permalink_url, user: spotPLUserId }
-              chrome.runtime.sendMessage({
-                  action: 'newSpotifyPlaylist',
-                  method: '',
-                  args: { playlist: playlist, iframeSrc: src2 }
-                })
-            }
-          } /** end spotify playlist embeds **/
+          //leaving out until web app ready to accomodate playlists
+          // if(src2.split(':playlist:').length > 1) {
+          //   var spotPLId = src2.split(':playlist:')[1].split('&')[0];
+          //   var spotPLUserId = src2.split(':playlist:')[0].split(':user:')[1];
+          //   if(spotifyUsers.indexOf(spotPLUserId) < 0) {
+          //     spotifyUsers += spotPLUserId;
+          //     var permalink_url = "http://open.spotify.com/user/" + spotPLUserId + "/playlist/" + spotPLId;
+          //     var playlist = { permalink_url: permalink_url, user: spotPLUserId }
+          //     chrome.runtime.sendMessage({
+          //         action: 'newSpotifyPlaylist',
+          //         method: '',
+          //         args: { playlist: playlist, iframeSrc: src2 }
+          //       })
+          //   }
+          // }
+          /** end spotify playlist embeds **/
         } /**end spotify embeds **/
 
     } /** end if(iframe.outerHTML)**/

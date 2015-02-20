@@ -10,6 +10,15 @@
     "48": "icons/buds.png",
     "128": "icons/buds.png"
   },
+  "commands": {
+    "toggleMusic" : {
+      "suggested_key": {
+        "default": "Alt+P",
+        "mac": "Alt+P"
+      },
+      "description": "Pause and play music in the web app."
+    }
+  },
   "default_locale": "en",
   "background": {
     "page": "src/bg/background.html",

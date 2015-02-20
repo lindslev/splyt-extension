@@ -3,7 +3,7 @@
 'use strict';
 
 var currentPage = chrome.extension.getBackgroundPage();
-var ip = '192.168.1.148'
+var ip = '192.168.1.148';
 
 angular.module('splytApp', [])
   .controller('HomeCtrl', function ($http, $scope, $timeout) {
@@ -39,9 +39,9 @@ angular.module('splytApp', [])
       song.action == 'newSpotifySong' ? $scope.clickedAddSpotify = true : $scope.clickedAddSong = true;
     }
 
-    $scope.addPlaylist = function(playlist) {
-      alert('Ability to add playlists coming soon!');
-    }
+    // $scope.addPlaylist = function(playlist) {
+    //   alert('Ability to add playlists coming soon!');
+    // }
 
     $scope.login = function() {
       window.open('http://' + ip + ':9000/auth/google', '_blank');
@@ -86,6 +86,10 @@ angular.module('splytApp', [])
         .error(function(err){
           console.log('err', err);
         })
+    }
+
+    $scope.cancel = function() {
+      $scope.clickedAddSong = false;
     }
 
     $scope.controlPlayer = function() {

@@ -1,6 +1,7 @@
 <!doctype html>
 <head>
   <link href='http://fonts.googleapis.com/css?family=Lato:100,300,400,700,900,100italic,300italic,400italic,700italic,900italic' rel='stylesheet' type='text/css'>
+  <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
   <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
   <link href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="browser_action.css">
@@ -8,23 +9,27 @@
 </head>
 <script src="/js/angular/angular.js"></script>
 <script src="/js/angular-cookies.js"></script>
-<script src="browser_action.js"></script>
 <script src="/js/jquery/jquery.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="browser_action.js"></script>
 <body ng-app="splytApp">
   <div ng-controller="HomeCtrl">
     <div class="container">
       <div class="row">
         <h1 class="animated lightSpeedIn">Splyt</h1>
         <button ng-hide="isLoggedIn" class="btn btn-google-plus" ng-click="login()">Login with Google</button>
-        <div id="playerController" ng-show="isLoggedIn" ng-hide="musicPlayingInApp == 'NOTHING'"><span ng-click="controlPlayer()" class="glyphicon" ng-class="{ 'glyphicon-pause' : musicPlayingInApp, 'glyphicon-play' : !musicPlayingInApp }"></span></div>
+        <div id="playerController" ng-hide="!isLoggedIn || musicPlayingInApp == 'NOTHING'"><span ng-click="controlPlayer()" class="glyphicon" ng-class="{ 'glyphicon-pause' : musicPlayingInApp, 'glyphicon-play' : !musicPlayingInApp }"></span></div>
         <div ng-show="isLoggedIn" id="mainStuff">
           <p ng-hide="songs.length">No music on this page!</p>
           <div id="userPlaylists" ng-show="clickedAddSong">
-            <p class="playlistSelection" ng-repeat="list in userPlaylists" ng-click="addToPlaylist(list)">Add {{selectedSong.args.song.title}} to {{list.title}}</p>
+            <p class="addThis">Add <span>{{selectedSong.args.song.title}}</span> to..</p>
+            <p class="playlistSelection" ng-repeat="list in userPlaylists" ng-click="addToPlaylist(list)">{{list.title}}</p>
+            <button class="btn btn-close" ng-click="cancel()">Cancel</button>
           </div>
           <div id="userPlaylists" ng-show="clickedAddSpotify">
             <p class="playlistSelection" ng-click="addToSpotify()">Add {{selectedSong.args.song.title}} to {{userSpotify.title}}</p>
           </div>
+          <br>
           <div id="searchBar" ng-show="songs.length">
             <input ng-model="searchTerm" placeholder="find songs here"></input>
           </div>
@@ -34,7 +39,7 @@
             <a class='animated' href="{{songObj.args.song.permalink_url}}" target="_blank" ng-class="{ 'even' : $index%2, 'fadeInDown': hover }" ng-mouseover='hover = true' ng-mouseout='hover = false'>{{songObj.args.song.title}}<span ng-hide="songObj.args.song.title.length">No title</span></a>
             <i class="fa fa-plus-circle" ng-show="isLoggedIn" ng-click="addSong(songObj)"></i>
           </div>
-          <p class='subtitle' ng-show="playlists.length || spotPlaylists.length">Playlists on Page</p>
+          <!-- <p class='subtitle' ng-show="playlists.length || spotPlaylists.length">Playlists on Page</p>
           <div ng-show="playlists.length" ng-repeat="plObj in playlists">
             <a class='animated' href="{{plObj.args.playlist.permalink_url}}" target="_blank" ng-class="{ 'even' : $index%2 }">{{plObj.args.playlist.title}}</a>
             <i class="fa fa-plus-circle" ng-show="isLoggedIn" ng-click="addPlaylist(plObj)"></i>
@@ -42,7 +47,7 @@
           <div ng-show="spotPlaylists.length" ng-repeat="plObj in spotPlaylists">
             <a class='animated' href="{{plObj.args.playlist.permalink_url}}" target="_blank" ng-class="{ 'even' : $index%2 }">{{plObj.args.playlist.user}}'s Spotify playlist</a>
             <i class="fa fa-plus-circle" ng-show="isLoggedIn" ng-click="addPlaylist(plObj)"></i>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
