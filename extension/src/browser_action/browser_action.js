@@ -3,7 +3,7 @@
 'use strict';
 
 var currentPage = chrome.extension.getBackgroundPage();
-var ip = '192.168.1.148';
+var ip = '192.168.1.52';
 
 angular.module('splytApp', [])
   .controller('HomeCtrl', function ($http, $scope, $timeout) {
@@ -93,6 +93,7 @@ angular.module('splytApp', [])
     }
 
     $scope.controlPlayer = function() {
+      console.log('testin')
       var action;
       if($scope.musicPlayingInApp !== 'NOTHING') {
         if($scope.musicPlayingInApp) {

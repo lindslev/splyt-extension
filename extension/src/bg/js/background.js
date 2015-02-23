@@ -78,11 +78,11 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 // Fires when the active tab in a window changes
 chrome.tabs.onActivated.addListener(function(changeInfo){
   setBrowserBadgeToZero();
-    runChecks(changeInfo.tabId)
     chrome.tabs.query({}, function(tabs){
       tabs.forEach(function(tab){
         if(tab.id == changeInfo.tabId) {
           if(!tab.url.match(/localhost/g)) {
+            runChecks(changeInfo.tabId);
             runSpecialChecks(tab, changeInfo.tabId)
           }
         }
@@ -213,7 +213,7 @@ chrome.runtime.onMessageExternal.addListener(
 // KEYBOARD SHORTCUTZ
 //-----------------------
 chrome.commands.onCommand.addListener(function(command) {
-  $.ajax('http://192.168.1.148:9000/api/youtubes/player/pause')
+  $.ajax('http://192.168.1.52:9000/api/youtubes/player/pause')
           .done(function(){ })
 });
 
