@@ -66,7 +66,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 // Whenever you open a new tab or go to a new page from an existing tab, and it finishes loading, send a message to that tab telling the app to initialize.
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
   setBrowserBadgeToZero();
-  if(!tab.url.match(/localhost/g)) {
+  if(!tab.url.match(/localhost/g) && !tab.url.match(/splyt/g)) {
     if (changeInfo.status && changeInfo.status == 'complete') {
       runChecks(tabId)
     }
@@ -81,7 +81,7 @@ chrome.tabs.onActivated.addListener(function(changeInfo){
     chrome.tabs.query({}, function(tabs){
       tabs.forEach(function(tab){
         if(tab.id == changeInfo.tabId) {
-          if(!tab.url.match(/localhost/g)) {
+          if(!tab.url.match(/localhost/g) && !tab.url.match(/splyt/g)) {
             runChecks(changeInfo.tabId);
             runSpecialChecks(tab, changeInfo.tabId)
           }
