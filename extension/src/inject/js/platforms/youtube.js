@@ -5,7 +5,6 @@ function scrapeYoutube() {
     var vids = $('.yt-lockup-title');
     vids.each(function(){
       var outerHTML = this.outerHTML;
-      console.log('whyyyy', outerHTML);
       if(outerHTML.split('watch?v=').length > 1) {
         var videoID = outerHTML.split('watch?v=')[1].split('"')[0];
         var title = outerHTML.split('title="')[1].split('"')[0];
