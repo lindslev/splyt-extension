@@ -18,7 +18,7 @@ modules.on('checkForEmbed', scrapeEmbed)
 ***/
 ////
 
-modules.on('tumblrAudio', _.debounce(scrapeTumblr, 200))
+modules.on('tumblrAudio', _.debounce(scrapeTumblr, 700))
 
 ////
 /***
@@ -42,7 +42,7 @@ modules.on('facebookAudio', _.debounce(scrapeFacebook, 2000))
 ***/
 ////
 
-modules.on('youtubeNative', _.debounce(scrapeYoutube, 200))
+modules.on('youtubeNative', _.debounce(scrapeYoutube, 700))
 
 ////
 /***
@@ -57,7 +57,7 @@ if(domainName().match(/soundcloud/g)) {
   })
 }
 
-modules.on('soundcloudNative', _.debounce(scrapeSoundcloud, 200))
+modules.on('soundcloudNative', _.debounce(scrapeSoundcloud, 700))
 
 ////
 /***
