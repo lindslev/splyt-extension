@@ -3,7 +3,7 @@
 'use strict';
 
 var currentPage = chrome.extension.getBackgroundPage();
-var ip = '192.168.1.52';
+var link = 'splytmusic.herokuapp.com';
 
 angular.module('splytApp', [])
   .controller('HomeCtrl', function ($http, $scope, $timeout) {
@@ -19,7 +19,7 @@ angular.module('splytApp', [])
     if($scope.currentUser) {
       var req = {
         method: 'GET',
-        url: 'http://' + ip + ':9000/api/users/' + $scope.currentUser._id + '/playlists',
+        url: 'http://' + link + '/api/users/' + $scope.currentUser._id + '/playlists',
         headers: {
           'authorization': "Bearer " + token
         }
@@ -44,7 +44,7 @@ angular.module('splytApp', [])
     // }
 
     $scope.login = function() {
-      window.open('http://' + ip + ':9000/auth/google', '_blank');
+      window.open('https://' + link + '/auth/google', '_blank');
     }
 
     $scope.addToPlaylist = function(playlist) {
@@ -52,7 +52,7 @@ angular.module('splytApp', [])
       //add new song to server
       var req = {
         method: 'POST',
-        url: 'http://' + ip + ':9000/api/users/addSong/' + $scope.currentUser._id + '/playlist/' + playlist._id,
+        url: 'http://' + link + '/api/users/addSong/' + $scope.currentUser._id + '/playlist/' + playlist._id,
         headers: {
           'authorization': "Bearer " + token
         },
@@ -72,7 +72,7 @@ angular.module('splytApp', [])
       $scope.clickedAddSpotify = false;
       var req = {
         method: 'POST',
-        url: 'http://' + ip + ':9000/api/users/addSong/' + $scope.currentUser._id + '/playlist/' + $scope.userSpotify._id,
+        url: 'http://' + link + '/api/users/addSong/' + $scope.currentUser._id + '/playlist/' + $scope.userSpotify._id,
         headers: {
           'authorization': "Bearer " + token
         },
@@ -93,7 +93,6 @@ angular.module('splytApp', [])
     }
 
     $scope.controlPlayer = function() {
-      console.log('testin')
       var action;
       if($scope.musicPlayingInApp !== 'NOTHING') {
         if($scope.musicPlayingInApp) {
@@ -104,7 +103,7 @@ angular.module('splytApp', [])
           action = 'pause';
         }
       }
-      $http.get('http://' + ip + ':9000/api/youtubes/player/' + action)
+      $http.post('http://' + link + '/api/youtubes/player/' + action, $scope.currentUser)
           .success(function(){ })
     }
   });

@@ -39,15 +39,6 @@
             <a class='animated' href="{{songObj.args.song.permalink_url}}" target="_blank" ng-class="{ 'even' : $index%2, 'fadeInDown': hover }" ng-mouseover='hover = true' ng-mouseout='hover = false'>{{songObj.args.song.title}}<span ng-hide="songObj.args.song.title.length">No title</span></a>
             <i class="fa fa-plus-circle" ng-show="isLoggedIn" ng-click="addSong(songObj)"></i>
           </div>
-          <!-- <p class='subtitle' ng-show="playlists.length || spotPlaylists.length">Playlists on Page</p>
-          <div ng-show="playlists.length" ng-repeat="plObj in playlists">
-            <a class='animated' href="{{plObj.args.playlist.permalink_url}}" target="_blank" ng-class="{ 'even' : $index%2 }">{{plObj.args.playlist.title}}</a>
-            <i class="fa fa-plus-circle" ng-show="isLoggedIn" ng-click="addPlaylist(plObj)"></i>
-          </div>
-          <div ng-show="spotPlaylists.length" ng-repeat="plObj in spotPlaylists">
-            <a class='animated' href="{{plObj.args.playlist.permalink_url}}" target="_blank" ng-class="{ 'even' : $index%2 }">{{plObj.args.playlist.user}}'s Spotify playlist</a>
-            <i class="fa fa-plus-circle" ng-show="isLoggedIn" ng-click="addPlaylist(plObj)"></i>
-          </div> -->
         </div>
       </div>
     </div>

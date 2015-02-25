@@ -1,6 +1,5 @@
 //PUT YOUR IP ADDRESS HERE with http:// in front of it. It's important, at least for DEV environments.
 //When you're in production, make sure that your production url's reflected here.
-var Splyt = new Splyt('192.168.1.148:9000');
 chrome.browserAction.setBadgeBackgroundColor({ color: '#009688' })
 
 function setBrowserBadgeToZero() {
@@ -18,7 +17,6 @@ setBrowserBadgeToZero();
 
 var currentSongsOnPage = [], currentPlaylistsOnPage = [], currentSpotPlaylistsOnPage = [];
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-    console.log('RECEIVED MESSAGE FROM CONTENT:', message)
     var obj = { action: message.action, args: message.args }
     if(message.action == 'newSCSong') currentSongsOnPage.push(obj);
     if(message.action == 'newSCPlaylist') currentPlaylistsOnPage.push(obj);
@@ -144,7 +142,6 @@ function runSpecialChecks(tab, tabId) {
     })
   }
   if(tab.url.match(/soundcloud/g)) {
-    console.log('test...')
     chrome.tabs.sendMessage(tabId, {
       action: 'soundcloudNative',
       err: null,
@@ -213,8 +210,10 @@ chrome.runtime.onMessageExternal.addListener(
 // KEYBOARD SHORTCUTZ
 //-----------------------
 chrome.commands.onCommand.addListener(function(command) {
-  $.ajax('http://192.168.1.52:9000/api/youtubes/player/pause')
-          .done(function(){ })
+  if(isLoggedIn) {
+    $.post('http://splytmusic.herokuapp.com/api/youtubes/player/pause', identity)
+            .done(function(){ })
+  }
 });
 
 //---------------------------------------------------

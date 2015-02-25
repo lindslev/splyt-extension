@@ -8,7 +8,6 @@ function scrapeFacebook() {
       if(outerHTML.match(/soundcloud/g)) {
         songTitle = $(this).text();
         if(href.split('php?u=').length > 1) href = href.split('php?u=')[1].split('&')[0];
-        console.log('inside embed SC', songTitle, holder)
         if(holder.indexOf(songTitle) < 0) {
           holder.push(songTitle);
           $.ajax({ url : 'https://api.soundcloud.com/resolve.json?url=' + href + '&client_id=7af759eb774be5664395ed9afbd09c46' })
