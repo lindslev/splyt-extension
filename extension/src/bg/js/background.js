@@ -184,11 +184,11 @@ function runSpecialChecks(tab, tabId) {
 
 //////////////////////////////////////////////
 // This block listens to messages sent from your "externally connectable" website. Line 27 - manifest json. Right now it just logs and calls back.
-var isLoggedIn = false, identity, token, musicPlaying;
+var isLoggedIn = false, identity, token, musicPlaying = 'NOTHING';
 chrome.runtime.onMessageExternal.addListener(
     function(request, sender, sendResponse) {
         console.log('WE ARE INSIDE OF MESSAGE EXTERNAL', arguments);
-        if(arguments[0].action === 'LOGIN' && arguments[0].user) {
+        if(arguments[0].action === 'LOGIN' && arguments[0].user && arguments[0].token) {
           isLoggedIn = true;
           identity = arguments[0].user;
           token = arguments[0].token;
