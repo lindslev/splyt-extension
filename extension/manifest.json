@@ -1,6 +1,6 @@
 {
   "name": "Splyt",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "manifest_version": 2,
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "description": "the best experience for discovering, sharing and listening to web-hosted music in the browser",
@@ -33,7 +33,9 @@
   "externally_connectable": {
     "matches": ["http://localhost:9000/*",
                 "*://splytmusic.herokuapp.com/*",
-                "*://splytmusic.io/*"
+                "*://www.splytmusic.herokuapp.com/*",
+                "*://splytmusic.io/*",
+                "*://www.splytmusic.io/*"
               ]
   },
   "permissions": [

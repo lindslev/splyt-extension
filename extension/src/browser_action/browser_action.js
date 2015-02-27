@@ -44,7 +44,7 @@ angular.module('splytApp', [])
     // }
 
     $scope.login = function() {
-      window.open('https://' + link + '/auth/google', '_blank');
+      window.open('http://splytmusic.io/auth/google', '_blank');
     }
 
     $scope.addToPlaylist = function(playlist) {
