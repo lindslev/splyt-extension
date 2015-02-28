@@ -18,7 +18,7 @@ When you go to any page on Chrome, the extension inspects the HTML of the page..
 * lodash - utility library for better controlling extension behavior
 
 ## The Other Side to Splyt
-[Extension Repo](https://github.com/lindslev/splyt-extension)
+[Server Repo](https://github.com/lindslev/splyt-server)
 
 ## Contributors
 
