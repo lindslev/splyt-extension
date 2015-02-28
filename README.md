@@ -1,7 +1,7 @@
 Splyt - the Chrome extension
 ================
 
-The extension side of the revolutionary Chrome music experience, where users can add songs from around the web to playlists and control the Splyt web app's player.
+The extension side of the revolutionary Chrome music experience, where users can add songs from around the web to playlists and control the Splyt web app's player. Check it out [in the Chrome Web Store](https://chrome.google.com/webstore/detail/splyt/dekmhppoomofnjclcollpbdknpldlgnd?authuser=2).
 
 ## Demo
 
